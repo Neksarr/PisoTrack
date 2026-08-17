@@ -80,8 +80,7 @@
 
   /* Transactions */
   .filters { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-  .filters #filterLabel { grid-column: 1 / 2; }
-  .filters .balance-chip { grid-column: 2 / 3; }
+  .filters .balance-chip { grid-column: 1 / -1; justify-self: center; width: min(220px, 100%); }
   .tx-row { grid-template-columns: minmax(0,1fr) auto !important; gap: 10px !important; }
   .tx-row .edit { grid-column: 2; padding: 8px 12px; }
   .tx-amount { grid-column: 2; grid-row: 1; }
