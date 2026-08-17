@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-  if (!document.querySelector('link[href="mobile.css"]')) {
+  if (!document.querySelector('link[href^="mobile.css"]')) {
     const mobileStyles = document.createElement("link");
     mobileStyles.rel = "stylesheet";
-    mobileStyles.href = "mobile.css";
+    mobileStyles.href = "mobile.css?v=20260818-2";
     document.head.appendChild(mobileStyles);
   }
   const sharedStyle = document.createElement("style");

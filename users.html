@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PisoTrack - Profile</title><link rel="icon" href="pisotrack.png"><style>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PisoTrack - Profile</title><link rel="icon" href="pisotrack.png"><link rel="stylesheet" href="mobile.css?v=20260818-2"><style>
 *{box-sizing:border-box}
 :root{--blue:#4d6d87;--light-blue:#8cb3d2;--page:#eef1f4;--card:#fff;--cream:#fbfbf7;--text:#111;--muted:#747b82;--border:#dfe4e7}
 body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--page);color:var(--text)}
@@ -61,7 +61,8 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 
 let user,shown=false,settings;function maskEmail(e){const at=e.indexOf("@");if(at<=1)return"••••"+e.substring(Math.max(0,at));return e[0]+"••••••"+e.substring(at)}
 const profileActions=document.querySelector(".profile-actions");
-const forgotPasswordButton=document.getElementById("forgotPassword");
+let forgotPasswordButton=document.getElementById("forgotPassword");
+if(!forgotPasswordButton){forgotPasswordButton=document.createElement("button");forgotPasswordButton.id="forgotPassword";forgotPasswordButton.type="button";forgotPasswordButton.className="wide-pattern";forgotPasswordButton.textContent="Forgot Password";profileActions.insertBefore(forgotPasswordButton,document.getElementById("logout"))}
 forgotPasswordButton.style.setProperty("display","block","important");
 document.body.insertAdjacentHTML("beforeend",'<div class="modal" id="forgotPasswordModal"><form class="modal-box" id="forgotPasswordForm"><h3>Forgot Password</h3><p class="confirm-help">Enter your email address and PisoTrack will send you a secure password-reset link.</p><div id="forgotPasswordMessage" class="message" role="status"></div><label for="forgotPasswordEmail">Email Address</label><input id="forgotPasswordEmail" class="input" type="email" required autocomplete="email"><div class="modal-actions"><button id="cancelForgotPassword" class="btn secondary" type="button">Cancel</button><button id="sendResetEmail" class="btn" type="submit">Send Email</button></div></form></div>');
 const forgotPasswordModal=document.getElementById("forgotPasswordModal"),forgotPasswordForm=document.getElementById("forgotPasswordForm"),forgotPasswordEmail=document.getElementById("forgotPasswordEmail"),forgotPasswordMessage=document.getElementById("forgotPasswordMessage"),sendResetEmail=document.getElementById("sendResetEmail"),cancelForgotPassword=document.getElementById("cancelForgotPassword");
