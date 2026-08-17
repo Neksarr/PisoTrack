@@ -73,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   sidebar.insertBefore(button, footer);
 
   button.addEventListener("click", async () => {
+    if (!confirm("Are you sure you want to log out?")) return;
     button.disabled = true;
     button.querySelector("span").textContent = "Logging out...";
     try {
