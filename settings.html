@@ -511,7 +511,7 @@
           : init();
       })();
     </script>
-    <script src="logout.js?v=20260818-5" defer></script>
+    <script src="logout.js?v=20260818-6" defer></script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
       import {
@@ -667,7 +667,7 @@
       about.onclick = () => aboutModal.classList.add("open");
       closeAbout.onclick = () => aboutModal.classList.remove("open");
       logout.onclick = async () => {
-        if (!confirm("Are you sure you want to log out?")) return;
+        if (!await window.pisoTrackConfirm({ title: "Log Out?", message: "Are you sure you want to log out?", confirmText: "Log Out" })) return;
         await signOut(auth);
         location.href = "login.html";
       };
