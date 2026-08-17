@@ -1,0 +1,688 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PisoTrack - Home</title>
+  <link rel="icon" href="pisotrack.png">
+  <style>
+    * {
+      box-sizing: border-box
+    }
+
+    :root {
+      --blue: #4d6d87;
+      --light-blue: #8cb3d2;
+      --page: #eef1f4;
+      --card: #fff;
+      --cream: #fbfbf7;
+      --text: #111;
+      --muted: #747b82;
+      --border: #dfe4e7
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--page);
+      color: var(--text)
+    }
+
+    body.dark {
+      --page: #17191c;
+      --card: #23262a;
+      --cream: #2c3035;
+      --text: #f5f5f5;
+      --muted: #b7bcc2;
+      --border: #3a3f45
+    }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px 1fr
+    }
+
+    .sidebar {
+      background: var(--blue);
+      color: #fff;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px
+    }
+
+    .brand img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 10px
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 25px
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, .16)
+    }
+
+    .nav-item img {
+      width: 25px;
+      height: 25px;
+      object-fit: contain;
+      filter: brightness(0) invert(1)
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      font-size: 12px;
+      opacity: .8;
+      padding: 10px 16px
+    }
+
+    .main {
+      padding: 30px 36px 45px;
+      min-width: 0
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 26px
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 30px
+    }
+
+    .user-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--blue);
+      font-weight: bold;
+      text-decoration: none
+    }
+
+    .user-box img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 5px 18px rgba(0, 0, 0, .05)
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px
+    }
+
+    .panel-head h3 {
+      margin: 0;
+      font-size: 22px
+    }
+
+    .btn {
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--blue);
+      border: 1px solid var(--blue)
+    }
+
+    .btn.danger {
+      background: #a64040
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border);
+      background: var(--cream);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 0 14px;
+      font-size: 15px;
+      outline: none
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 7px
+    }
+
+    .message {
+      display: none;
+      padding: 11px 13px;
+      border-radius: 10px;
+      margin: 0 0 14px;
+      font-size: 14px
+    }
+
+    .message.show {
+      display: block
+    }
+
+    .message.error {
+      background: #ffe6e6;
+      color: #8a1f1f
+    }
+
+    .message.success {
+      background: #e4f6e9;
+      color: #176235
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .52);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 50
+    }
+
+    .modal.open {
+      display: flex
+    }
+
+    .modal-box {
+      width: min(520px, 100%);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 20px;
+      padding: 24px 25px;
+      max-height: 92vh;
+      overflow: auto;
+      box-shadow: 0 20px 55px rgba(0, 0, 0, .22);
+      animation: modal-pop .18s ease-out
+    }
+
+    .modal-box h3 {
+      margin: 0 0 10px;
+      font-size: 25px
+    }
+
+    .modal-box label {
+      margin: 12px 0 8px;
+      font-size: 16px
+    }
+
+    .modal-box .input,
+    .modal-box .select {
+      height: 48px;
+      border-color: var(--border);
+      background: var(--cream);
+      color: var(--text);
+      border-radius: 12px
+    }
+
+    .modal-box .input:focus,
+    .modal-box .select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(77, 109, 135, .16)
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 18px
+    }
+
+    .modal-actions .btn {
+      min-width: 70px
+    }
+
+    body.dark .modal {
+      background: rgba(0, 0, 0, .72)
+    }
+
+    body.dark .modal-box {
+      background: #23272b
+    }
+
+    body.dark .modal-box .input,
+    body.dark .modal-box .select {
+      background: #2c3137;
+      border-color: #3d444b;
+      color: #f5f5f5;
+      color-scheme: dark
+    }
+
+    @keyframes modal-pop {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(.98)
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 34px
+    }
+
+    .status {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px
+    }
+
+    @media(max-width:950px) {
+      .layout {
+        grid-template-columns: 1fr
+      }
+
+      .sidebar {
+        display: none
+      }
+
+      .main {
+        padding: 24px
+      }
+    }
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+}
+
+.dash-card {
+    color: white;
+    border-radius: 28px;
+    aspect-ratio: 1008 / 550;
+    padding: clamp(24px, 5%, 38px);
+    min-width: 0;
+    box-sizing: border-box;
+
+    background-image: url("tab1.png");
+    /* Keep the transparent rounded corners in the source image visible. */
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    overflow: hidden;
+}
+
+.dash-card:first-child {
+    grid-column: 1 / -1;
+}
+
+.dash-card.small {
+    background-image: url("tab2.png");
+    aspect-ratio: 504 / 286;
+    padding: clamp(18px, 8%, 30px);
+}
+
+.card-label {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.3;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(24, 71, 102, .65);
+}
+
+.card-amount {
+    font-size: clamp(24px, 2.2vw, 34px);
+    font-weight: bold;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+    text-shadow: 0 2px 4px rgba(24, 71, 102, .7);
+}
+
+.dash-card.small .card-amount {
+    font-size: clamp(22px, 1.9vw, 30px);
+}
+
+.dashboard-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.dashboard-actions .btn,
+.dashboard-actions .btn.secondary {
+    background: var(--blue);
+    border: 1px solid var(--blue);
+    color: #fff;
+}
+
+.dashboard-actions .btn:hover,
+.dashboard-actions .btn.secondary:hover {
+    filter: brightness(1.08);
+}
+
+.field-hidden {
+    display: none;
+}
+
+    .transaction {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--cream);
+      padding: 16px 18px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      font-weight: bold
+    }
+
+    .transaction:nth-child(n+4) {
+      display: none
+    }
+
+    @media(max-width:1100px) {
+      .dashboard {
+        max-width: 680px
+      }
+    }
+
+    @media(max-width:520px) {
+      .dashboard {
+        gap: 16px
+      }
+
+      .dash-card {
+        padding: 7%
+      }
+
+      .dash-card.small {
+        padding: 9%
+      }
+
+      .card-label {
+        font-size: 13px;
+        margin-bottom: 5px
+      }
+
+      .card-amount,
+      .dash-card.small .card-amount {
+        font-size: clamp(18px, 6vw, 28px)
+      }
+    }
+  </style>
+<style>
+/* Shared slide-out navigation */
+.layout{grid-template-columns:1fr!important}
+.sidebar{display:flex!important;position:fixed!important;inset:0 auto 0 0!important;width:250px;height:100vh;z-index:100;transform:translateX(-100%);transition:transform .24s ease;box-shadow:8px 0 24px rgba(0,0,0,.18)}
+.sidebar.menu-open{transform:translateX(0)}
+.menu-toggle{position:fixed;top:18px;left:18px;z-index:110;width:48px;height:48px;padding:10px;border:0;border-radius:12px;background:var(--blue);cursor:pointer;transition:transform .18s ease,filter .18s ease,left .24s ease;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.menu-toggle:hover{transform:scale(1.14);filter:brightness(1.1)}
+.menu-toggle img{display:block;width:100%;height:100%;object-fit:contain;filter:brightness(0) invert(1)}
+body.nav-open .menu-toggle{left:266px}
+.menu-overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.42);opacity:0;visibility:hidden;transition:opacity .24s ease,visibility .24s ease}
+.menu-overlay.open{opacity:1;visibility:visible}
+.topbar{padding-left:58px}
+@media(max-width:520px){body.nav-open .menu-toggle{left:calc(100% - 62px)}.sidebar{width:min(250px,calc(100% - 72px))}.topbar{padding-left:54px}}
+</style>
+</head>
+
+<body><button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false"><img src="3lines.png" alt=""></button><div class="menu-overlay" aria-hidden="true"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand"><img src="pisotrack.png" alt="">
+        <h1>PisoTrack</h1>
+      </div><a class="nav-item active" href="index.html"><img src="homeicon.png" alt="">Home</a><a class="nav-item"
+        href="transactions.html"><img src="purchaseicon.png" alt="">Transactions</a><a class="nav-item"
+        href="reports.html"><img src="reporticon.png" alt="">Reports</a><a class="nav-item" href="settings.html"><img
+          src="settingicon.png" alt="">Settings</a>
+      <div class="sidebar-bottom">PisoTrack Website</div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <h2>Budget Tracker</h2><a class="user-box" href="users.html"><img src="profileicon.png"><span
+            id="userName">User</span></a>
+      </div>
+      <section class="dashboard">
+        <div class="dash-card">
+          <div class="card-label">Current Balance</div>
+          <div id="balance" class="card-amount">₱0</div>
+        </div>
+        <div class="dash-card small">
+          <div class="card-label">Total Income</div>
+          <div id="income" class="card-amount">₱0</div>
+        </div>
+        <div class="dash-card small">
+          <div class="card-label">Total Expenses</div>
+          <div id="expense" class="card-amount">₱0</div>
+        </div>
+        <div class="dashboard-actions">
+          <button class="btn" id="addIncome" type="button">+ Add Income</button>
+          <button class="btn secondary" id="addExpense" type="button">+ Add Expense</button>
+        </div>
+      </section>
+      <section class="panel" style="margin-top:24px">
+        <div class="panel-head">
+          <h3>Spending Breakdown</h3><a class="btn secondary" href="transactions.html">View All</a>
+        </div>
+        <div id="list">
+          <div class="empty">Loading...</div>
+        </div>
+        <div id="status" class="status"></div>
+      </section>
+    </main>
+  </div>
+  <div class="modal" id="transactionModal" role="dialog" aria-modal="true" aria-labelledby="transactionModalTitle">
+    <form class="modal-box" id="transactionForm">
+      <h3 id="transactionModalTitle">Add Transaction</h3>
+      <div id="formMessage" class="message error" role="alert"></div>
+      <label for="txTitle">Title</label>
+      <input id="txTitle" class="input" type="text" required maxlength="80" autocomplete="off">
+      <label for="txCategory">Category</label>
+      <select id="txCategory" class="select" required></select>
+      <div id="otherCategoryField" class="field-hidden">
+        <label for="txOtherCategory">Specify category</label>
+        <input id="txOtherCategory" class="input" type="text" maxlength="50" autocomplete="off">
+      </div>
+      <label for="txAmount">Amount</label>
+      <input id="txAmount" class="input" type="number" min="0.01" step="0.01" required>
+      <label for="txDate">Date</label>
+      <input id="txDate" class="input" type="date" required>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelTransaction" type="button">Cancel</button>
+        <button class="btn" id="saveTransaction" type="submit">Save</button>
+      </div>
+    </form>
+  </div>
+  <script src="logout.js" defer></script>
+  <script
+    type="module">import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js"; import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js"; import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyBv2m_ciaohvHg7xCqkSWeTM_TfiphzMqw",
+        authDomain: "pisotrack-e61d6.firebaseapp.com",
+        projectId: "pisotrack-e61d6",
+        storageBucket: "pisotrack-e61d6.firebasestorage.app",
+        messagingSenderId: "492013865042",
+        appId: "1:492013865042:web:e0ccf6e2bee76aab32f78b"
+      };
+
+      const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+      function safeEmailKey(email) { return String(email || "guest").replaceAll("@", "_at_").replaceAll(".", "_dot_").replaceAll("+", "_plus_") }
+      function transactionKey(email) { return "transactions_" + safeEmailKey(email) }
+      function normalizeTransactions(raw) { if (Array.isArray(raw)) return raw; if (typeof raw === "string") { try { const p = JSON.parse(raw); return Array.isArray(p) ? p : [] } catch (e) { return [] } } return [] }
+      function money(v, currency = "PHP", rate = 56.5) { if (currency === "USD") return "$" + (Number(v || 0) / rate).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); return "₱" + Number(v || 0).toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 2 }) }
+      async function getAppData(user) { const ref = doc(db, "users", user.uid, "appData", "default"), snap = await getDoc(ref); return { ref, data: snap.exists() ? snap.data() : {} } }
+      async function getTransactions(user) { const { data } = await getAppData(user); return normalizeTransactions(data[transactionKey(user.email)] ?? data[transactionKey(data.currentEmail)] ?? data.transactions) }
+      async function saveTransactions(user, list) { const ref = doc(db, "users", user.uid, "appData", "default"); await setDoc(ref, { currentEmail: user.email, email: user.email, [transactionKey(user.email)]: JSON.stringify(list), updatedAt: Date.now() }, { merge: true }) }
+      async function getSettings(user) { const { data } = await getAppData(user); return { currency: data.currency || "PHP", notifications: data.notifications !== false, dark: data.dark === true, phpPerUsd: typeof data.phpPerUsdNumber === "number" ? data.phpPerUsdNumber : 56.5 } }
+      async function saveSettings(user, values) { const ref = doc(db, "users", user.uid, "appData", "default"); await setDoc(ref, { ...values, currentEmail: user.email, email: user.email, updatedAt: Date.now() }, { merge: true }) }
+      function applyDark(v) { document.body.classList.toggle("dark", !!v) }
+      function fmtDate(ms) { return new Date(Number(ms)).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) }
+      function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])) }
+      function phtDateValue(date = new Date()) { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit" }).format(date) }
+      function phtTimestamp(dateValue) { return new Date(dateValue + "T12:00:00+08:00").getTime() }
+
+      const incomeCategories = ["Salary", "Allowance", "Business", "Freelance", "Bonus", "Gift", "Scholarship", "Investment", "Refund", "Other Income"];
+      const expenseCategories = ["Food", "Transportation", "School", "Bills", "Shopping", "Entertainment", "Health", "Rent", "Utilities", "Internet / Load", "Personal Care", "Family", "Pet Expenses", "Debt / Loan", "Other Expense"];
+      const modal = document.getElementById("transactionModal"), form = document.getElementById("transactionForm");
+      const categorySelect = document.getElementById("txCategory"), otherField = document.getElementById("otherCategoryField");
+      const titleInput = document.getElementById("txTitle"), otherCategoryInput = document.getElementById("txOtherCategory");
+      const amountInput = document.getElementById("txAmount"), dateInput = document.getElementById("txDate");
+      const modalTitle = document.getElementById("transactionModalTitle"), messageBox = document.getElementById("formMessage");
+      const saveButton = document.getElementById("saveTransaction"), incomeButton = document.getElementById("addIncome"), expenseButton = document.getElementById("addExpense");
+      const cancelButton = document.getElementById("cancelTransaction");
+      const userNameElement = document.getElementById("userName"), balanceElement = document.getElementById("balance");
+      const incomeElement = document.getElementById("income"), expenseElement = document.getElementById("expense");
+      const listElement = document.getElementById("list"), statusElement = document.getElementById("status");
+      let currentUser, settings, transactions = [], transactionType = "income";
+
+      function renderDashboard() {
+        let inc = 0, exp = 0;
+        transactions.forEach(t => t.type === "income" ? inc += Number(t.amount || 0) : exp += Number(t.amount || 0));
+        incomeElement.textContent = money(inc, settings.currency, settings.phpPerUsd);
+        expenseElement.textContent = money(exp, settings.currency, settings.phpPerUsd);
+        balanceElement.textContent = money(inc - exp, settings.currency, settings.phpPerUsd);
+        const recent = transactions.slice(-5).reverse();
+        listElement.innerHTML = recent.length ? recent.map(t => `<div class="transaction"><span>${esc(t.title || t.category || "Transaction")}</span><span>${t.type === "income" ? "+" : "-"}${money(t.amount, settings.currency, settings.phpPerUsd)}</span></div>`).join("") : '<div class="empty">No transactions yet.</div>';
+      }
+
+      function openTransactionModal(type) {
+        transactionType = type;
+        const categories = type === "income" ? incomeCategories : expenseCategories;
+        modalTitle.textContent = type === "income" ? "Add Income" : "Add Expense";
+        categorySelect.innerHTML = categories.map(category => `<option value="${esc(category)}">${esc(category)}</option>`).join("");
+        form.reset();
+        dateInput.value = phtDateValue();
+        otherField.classList.add("field-hidden");
+        otherCategoryInput.required = false;
+        messageBox.classList.remove("show");
+        modal.classList.add("open");
+        titleInput.focus();
+      }
+
+      function closeTransactionModal() { modal.classList.remove("open") }
+      function toggleOtherCategory() {
+        const needsOther = categorySelect.value === "Other Income" || categorySelect.value === "Other Expense";
+        otherField.classList.toggle("field-hidden", !needsOther);
+        otherCategoryInput.required = needsOther;
+        if (!needsOther) otherCategoryInput.value = "";
+      }
+
+      incomeButton.onclick = () => openTransactionModal("income");
+      expenseButton.onclick = () => openTransactionModal("expense");
+      cancelButton.onclick = closeTransactionModal;
+      categorySelect.onchange = toggleOtherCategory;
+      modal.onclick = event => { if (event.target === modal) closeTransactionModal() };
+      document.addEventListener("keydown", event => { if (event.key === "Escape") closeTransactionModal() });
+
+      form.onsubmit = async event => {
+        event.preventDefault();
+        if (!currentUser || !settings) {
+          messageBox.textContent = "Your account is still loading. Please try again in a moment.";
+          messageBox.classList.add("show");
+          return;
+        }
+        const amount = Number(amountInput.value), isOther = categorySelect.value.startsWith("Other ");
+        const category = isOther ? otherCategoryInput.value.trim() : categorySelect.value;
+        if (!titleInput.value.trim() || !category || !amount || amount <= 0 || !dateInput.value) {
+          messageBox.textContent = "Please complete all fields with a valid amount.";
+          messageBox.classList.add("show");
+          return;
+        }
+        saveButton.disabled = true;
+        try {
+          const phpAmount = settings.currency === "USD" ? amount * settings.phpPerUsd : amount;
+          transactions.push({ title: titleInput.value.trim(), category, amount: phpAmount, type: transactionType, time: phtTimestamp(dateInput.value) });
+          await saveTransactions(currentUser, transactions);
+          renderDashboard();
+          closeTransactionModal();
+        } catch (error) {
+          transactions.pop();
+          messageBox.textContent = "Could not save the transaction. Please try again.";
+          messageBox.classList.add("show");
+        } finally { saveButton.disabled = false }
+      };
+
+      onAuthStateChanged(auth, async user => {
+        if (!user) return location.href = "login.html";
+        if (!user.emailVerified) { await signOut(auth); return location.href = "login.html" }
+        try {
+          currentUser = user;
+          userNameElement.textContent = user.displayName || user.email;
+          settings = await getSettings(user);
+          applyDark(settings.dark);
+          transactions = await getTransactions(user);
+          renderDashboard();
+        } catch (error) {
+          statusElement.textContent = "Could not load dashboard data. Please refresh and try again.";
+          listElement.innerHTML = '<div class="empty">Unable to load transactions.</div>';
+        }
+      });</script>
+<script>
+(function(){
+  const button=document.querySelector(".menu-toggle"),sidebar=document.querySelector(".sidebar"),overlay=document.querySelector(".menu-overlay");
+  if(!button||!sidebar||!overlay)return;
+  function setMenu(open){sidebar.classList.toggle("menu-open",open);overlay.classList.toggle("open",open);document.body.classList.toggle("nav-open",open);button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu")}
+  button.addEventListener("click",()=>setMenu(!sidebar.classList.contains("menu-open")));
+  overlay.addEventListener("click",()=>setMenu(false));
+  sidebar.querySelectorAll("a").forEach(link=>link.addEventListener("click",()=>setMenu(false)));
+  document.addEventListener("keydown",event=>{if(event.key==="Escape")setMenu(false)});
+})();
+</script>
+</body>
+
+</html>

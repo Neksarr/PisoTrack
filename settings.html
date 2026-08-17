@@ -1,0 +1,683 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PisoTrack - Settings</title>
+    <link rel="icon" href="pisotrack.png" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      :root {
+        --blue: #4d6d87;
+        --light-blue: #8cb3d2;
+        --page: #eef1f4;
+        --card: #fff;
+        --cream: #fbfbf7;
+        --text: #111;
+        --muted: #747b82;
+        --border: #dfe4e7;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--page);
+        color: var(--text);
+      }
+      body.dark {
+        --page: #17191c;
+        --card: #23262a;
+        --cream: #2c3035;
+        --text: #f5f5f5;
+        --muted: #b7bcc2;
+        --border: #3a3f45;
+      }
+      .layout {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+      }
+      .sidebar {
+        background: var(--blue);
+        color: #fff;
+        padding: 28px 20px;
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 40px;
+      }
+      .brand img {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        border-radius: 10px;
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 25px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .nav-item:hover,
+      .nav-item.active {
+        background: rgba(255, 255, 255, 0.16);
+      }
+      .nav-item img {
+        width: 25px;
+        height: 25px;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+      }
+      .sidebar-bottom {
+        margin-top: auto;
+        font-size: 12px;
+        opacity: 0.8;
+        padding: 10px 16px;
+      }
+      .main {
+        padding: 30px 36px 45px;
+        min-width: 0;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 26px;
+      }
+      .topbar h2 {
+        margin: 0;
+        font-size: 30px;
+      }
+      .user-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--blue);
+        font-weight: bold;
+        text-decoration: none;
+      }
+      .user-box img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+      }
+      .panel {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
+      }
+      .panel-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+      .panel-head h3 {
+        margin: 0;
+        font-size: 22px;
+      }
+      .btn {
+        border: 0;
+        background: var(--blue);
+        color: #fff;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .btn.secondary {
+        background: transparent;
+        color: var(--blue);
+        border: 1px solid var(--blue);
+      }
+      .btn.danger {
+        background: #a64040;
+      }
+      .input,
+      .select {
+        width: 100%;
+        height: 48px;
+        border: 1px solid var(--border);
+        background: var(--cream);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 0 14px;
+        font-size: 15px;
+        outline: none;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+        margin: 12px 0 7px;
+      }
+      .message {
+        display: none;
+        padding: 11px 13px;
+        border-radius: 10px;
+        margin: 0 0 14px;
+        font-size: 14px;
+      }
+      .message.show {
+        display: block;
+      }
+      .message.error {
+        background: #ffe6e6;
+        color: #8a1f1f;
+      }
+      .message.success {
+        background: #e4f6e9;
+        color: #176235;
+      }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.58);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 50;
+      }
+      .modal.open {
+        display: flex;
+      }
+      .modal-box {
+        width: min(520px, 100%);
+        background: var(--card);
+        color: var(--text);
+        border-radius: 20px;
+        padding: 24px;
+        max-height: 92vh;
+        overflow: auto;
+      }
+      .modal-box h3 {
+        margin: 0 0 12px;
+        font-size: 24px;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 18px;
+      }
+      .empty {
+        text-align: center;
+        color: var(--muted);
+        padding: 34px;
+      }
+      .status {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 12px;
+      }
+      @media (max-width: 950px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: none;
+        }
+        .main {
+          padding: 24px;
+        }
+      }
+      .layout {
+        grid-template-columns: 1fr !important;
+      }
+      .sidebar {
+        display: flex !important;
+        position: fixed !important;
+        inset: 0 auto 0 0 !important;
+        width: 250px;
+        height: 100vh;
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.24s ease;
+        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.18);
+      }
+      .sidebar.menu-open {
+        transform: translateX(0);
+      }
+      .menu-toggle {
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        z-index: 110;
+        width: 48px;
+        height: 48px;
+        padding: 10px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--blue);
+        cursor: pointer;
+        transition:
+          transform 0.18s ease,
+          filter 0.18s ease,
+          left 0.24s ease;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+      }
+      .menu-toggle:hover {
+        transform: scale(1.14);
+        filter: brightness(1.1);
+      }
+      .menu-toggle img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+      }
+      body.nav-open .menu-toggle {
+        left: 266px;
+      }
+      .menu-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: rgba(0, 0, 0, 0.42);
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.24s ease,
+          visibility 0.24s ease;
+      }
+      .menu-overlay.open {
+        opacity: 1;
+        visibility: visible;
+      }
+      .topbar {
+        padding-left: 58px;
+      }
+      @media (max-width: 520px) {
+        body.nav-open .menu-toggle {
+          left: calc(100% - 62px);
+        }
+        .sidebar {
+          width: min(250px, calc(100% - 72px));
+        }
+        .topbar {
+          padding-left: 54px;
+        }
+      }
+
+      .settings-list {
+        width: 100%;
+        max-width: 920px;
+        margin-inline: auto;
+      }
+      .setting-row {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        align-items: center;
+        gap: 20px;
+        background: var(--card);
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-bottom: 12px;
+      }
+      .setting-title {
+        font-size: 18px;
+        font-weight: bold;
+      }
+      .setting-sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .switch {
+        justify-self: end;
+        width: 54px;
+        height: 30px;
+        background: #bbb;
+        border-radius: 20px;
+        position: relative;
+        cursor: pointer;
+      }
+      .switch:after {
+        content: "";
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        background: #fff;
+        border-radius: 50%;
+        top: 3px;
+        left: 3px;
+        transition: 0.2s;
+      }
+      .switch.on {
+        background: var(--blue);
+      }
+      .switch.on:after {
+        left: 27px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="pisotrack.png" alt="" />
+          <h1>PisoTrack</h1>
+        </div>
+        <a class="nav-item" href="index.html"
+          ><img src="homeicon.png" alt="" />Home</a
+        ><a class="nav-item" href="transactions.html"
+          ><img src="purchaseicon.png" alt="" />Transactions</a
+        ><a class="nav-item" href="reports.html"
+          ><img src="reporticon.png" alt="" />Reports</a
+        ><a class="nav-item active" href="settings.html"
+          ><img src="settingicon.png" alt="" />Settings</a
+        >
+        <div class="sidebar-bottom">PisoTrack Desktop</div>
+      </aside>
+      <main class="main">
+        <div class="topbar">
+          <h2>Settings</h2>
+          <a class="user-box" href="users.html"
+            ><img src="profileicon.png" /><span id="userName">User</span></a
+          >
+        </div>
+        <div class="settings-list">
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Currency</div>
+              <div class="setting-sub">Choose how amounts are displayed.</div>
+            </div>
+            <select id="currency" class="select">
+              <option>PHP</option>
+              <option>USD</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Cloud Sync</div>
+              <div class="setting-sub">
+                PisoTrack data saves automatically to Firebase.
+              </div>
+            </div>
+            <div id="syncStatus" style="text-align: right; font-weight: bold">
+              Connected
+            </div>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Dark Mode / White Mode</div>
+              <div class="setting-sub">Switch the website appearance.</div>
+            </div>
+            <div id="darkMode" class="switch"></div>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">About</div>
+              <div class="setting-sub">
+                PisoTrack: A Personal Expense Tracking and Budget Monitoring
+                System.
+              </div>
+            </div>
+            <button class="btn secondary" id="about">About</button>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Logout</div>
+              <div class="setting-sub">Sign out of your PisoTrack account.</div>
+            </div>
+            <button class="btn danger" id="logout">Logout</button>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div class="modal" id="aboutModal">
+      <div class="modal-box">
+        <h3>About PisoTrack</h3>
+        <p>
+          PisoTrack helps users record income and expenses, monitor their
+          balance, review transactions, and view monthly financial reports.<br>
+          <br>
+          Created by:<br>
+          Ayes, Princess Caroline A.<br>
+          Cabais, Matt R.<br>
+          Corpuz, Marl Skyler T.<br>
+          Gavina, Ariel G.<br>
+          Romaguera, Princess Athena D.<br>
+          Tolentino, Kalix Clark G.<br>
+          Villaflor, Aquisha Reese L.<br>
+        </p>
+        <div class="modal-actions">
+          <button class="btn" id="closeAbout">OK</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        function init() {
+          const button = document.createElement("button"),
+            overlay = document.createElement("div"),
+            sidebar = document.querySelector(".sidebar");
+          if (!sidebar) return;
+          button.className = "menu-toggle";
+          button.type = "button";
+          button.setAttribute("aria-label", "Open navigation menu");
+          button.setAttribute("aria-expanded", "false");
+          button.innerHTML = '<img src="3lines.png" alt="">';
+          overlay.className = "menu-overlay";
+          document.body.prepend(overlay);
+          document.body.prepend(button);
+          function setMenu(open) {
+            sidebar.classList.toggle("menu-open", open);
+            overlay.classList.toggle("open", open);
+            document.body.classList.toggle("nav-open", open);
+            button.setAttribute("aria-expanded", String(open));
+            button.setAttribute(
+              "aria-label",
+              open ? "Close navigation menu" : "Open navigation menu",
+            );
+          }
+          button.addEventListener("click", () =>
+            setMenu(!sidebar.classList.contains("menu-open")),
+          );
+          overlay.addEventListener("click", () => setMenu(false));
+          sidebar
+            .querySelectorAll("a")
+            .forEach((link) =>
+              link.addEventListener("click", () => setMenu(false)),
+            );
+          document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") setMenu(false);
+          });
+        }
+        document.readyState === "loading"
+          ? document.addEventListener("DOMContentLoaded", init)
+          : init();
+      })();
+    </script>
+    <script src="logout.js" defer></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyBv2m_ciaohvHg7xCqkSWeTM_TfiphzMqw",
+        authDomain: "pisotrack-e61d6.firebaseapp.com",
+        projectId: "pisotrack-e61d6",
+        storageBucket: "pisotrack-e61d6.firebasestorage.app",
+        messagingSenderId: "492013865042",
+        appId: "1:492013865042:web:e0ccf6e2bee76aab32f78b",
+      };
+
+      const app = initializeApp(firebaseConfig),
+        auth = getAuth(app),
+        db = getFirestore(app);
+      function safeEmailKey(email) {
+        return String(email || "guest")
+          .replaceAll("@", "_at_")
+          .replaceAll(".", "_dot_")
+          .replaceAll("+", "_plus_");
+      }
+      function transactionKey(email) {
+        return "transactions_" + safeEmailKey(email);
+      }
+      function normalizeTransactions(raw) {
+        if (Array.isArray(raw)) return raw;
+        if (typeof raw === "string") {
+          try {
+            const p = JSON.parse(raw);
+            return Array.isArray(p) ? p : [];
+          } catch (e) {
+            return [];
+          }
+        }
+        return [];
+      }
+      function money(v, currency = "PHP", rate = 56.5) {
+        if (currency === "USD")
+          return (
+            "$" +
+            (Number(v || 0) / rate).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+          );
+        return (
+          "₱" +
+          Number(v || 0).toLocaleString("en-PH", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+          })
+        );
+      }
+      async function getAppData(user) {
+        const ref = doc(db, "users", user.uid, "appData", "default"),
+          snap = await getDoc(ref);
+        return { ref, data: snap.exists() ? snap.data() : {} };
+      }
+      async function getTransactions(user) {
+        const { data } = await getAppData(user);
+        return normalizeTransactions(
+          data[transactionKey(user.email)] ?? data.transactions,
+        );
+      }
+      async function saveTransactions(user, list) {
+        const ref = doc(db, "users", user.uid, "appData", "default");
+        await setDoc(
+          ref,
+          {
+            currentEmail: user.email,
+            email: user.email,
+            [transactionKey(user.email)]: JSON.stringify(list),
+            updatedAt: Date.now(),
+          },
+          { merge: true },
+        );
+      }
+      async function getSettings(user) {
+        const { data } = await getAppData(user);
+        return {
+          currency: data.currency || "PHP",
+          dark: data.dark === true,
+          phpPerUsd:
+            typeof data.phpPerUsdNumber === "number"
+              ? data.phpPerUsdNumber
+              : 56.5,
+        };
+      }
+      async function saveSettings(user, values) {
+        const ref = doc(db, "users", user.uid, "appData", "default");
+        await setDoc(
+          ref,
+          {
+            ...values,
+            currentEmail: user.email,
+            email: user.email,
+            updatedAt: Date.now(),
+          },
+          { merge: true },
+        );
+      }
+      function applyDark(v) {
+        document.body.classList.toggle("dark", !!v);
+      }
+      function fmtDate(ms) {
+        return new Date(Number(ms)).toLocaleDateString("en-US", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+        });
+      }
+      function esc(s) {
+        return String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+
+      let user, s;
+      function paint() {
+        currency.value = s.currency;
+        darkMode.classList.toggle("on", s.dark);
+        applyDark(s.dark);
+      }
+      currency.onchange = async () => {
+        s.currency = currency.value;
+        await saveSettings(user, { currency: s.currency });
+      };
+      darkMode.onclick = async () => {
+        s.dark = !s.dark;
+        paint();
+        await saveSettings(user, { dark: s.dark });
+      };
+      about.onclick = () => aboutModal.classList.add("open");
+      closeAbout.onclick = () => aboutModal.classList.remove("open");
+      logout.onclick = async () => {
+        await signOut(auth);
+        location.href = "login.html";
+      };
+      onAuthStateChanged(auth, async (u) => {
+        if (!u) return (location.href = "login.html");
+        if (!u.emailVerified) {
+          await signOut(auth);
+          return (location.href = "login.html");
+        }
+        user = u;
+        userName.textContent = u.displayName || u.email;
+        s = await getSettings(u);
+        paint();
+        syncStatus.textContent = "Data saves automatically";
+      });
+    </script>
+  </body>
+</html>
