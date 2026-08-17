@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
   <head>
+    <script>if(localStorage.getItem("pisotrackDark")==="true")document.documentElement.classList.add("dark");</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>PisoTrack - Settings</title>
@@ -25,6 +26,7 @@
         background: var(--page);
         color: var(--text);
       }
+      html.dark body,
       body.dark {
         --page: #17191c;
         --card: #23262a;
@@ -509,7 +511,7 @@
           : init();
       })();
     </script>
-    <script src="logout.js" defer></script>
+    <script src="logout.js?v=20260818-4" defer></script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
       import {
@@ -622,7 +624,8 @@
         );
       }
       function applyDark(v) {
-        document.body.classList.toggle("dark", !!v);
+        document.documentElement.classList.toggle("dark", !!v);
+        if (document.body) document.body.classList.toggle("dark", !!v);
       }
       function fmtDate(ms) {
         return new Date(Number(ms)).toLocaleDateString("en-US", {
@@ -657,6 +660,7 @@
       };
       darkMode.onclick = async () => {
         s.dark = !s.dark;
+        localStorage.setItem("pisotrackDark", String(s.dark));
         paint();
         await saveSettings(user, { dark: s.dark });
       };
@@ -674,7 +678,14 @@
         }
         user = u;
         userName.textContent = u.displayName || u.email;
-        s = await getSettings(u);
+        try {
+          s = await getSettings(u);
+          localStorage.setItem("pisotrackDark", String(s.dark));
+          applyDark(s.dark);
+        } catch (error) {
+          console.error(error);
+          s = { currency: "PHP", notifications: true, dark: document.documentElement.classList.contains("dark"), phpPerUsd: 56.5 };
+        }
         paint();
         syncStatus.textContent = "Data saves automatically";
       });

@@ -2,12 +2,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!document.querySelector('link[href^="mobile.css"]')) {
     const mobileStyles = document.createElement("link");
     mobileStyles.rel = "stylesheet";
-    mobileStyles.href = "mobile.css?v=20260818-3";
+    mobileStyles.href = "mobile.css?v=20260818-4";
     document.head.appendChild(mobileStyles);
   }
   const sharedStyle = document.createElement("style");
-  sharedStyle.textContent = ".topbar{position:relative}.topbar h2{position:absolute;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap}.user-box img{transition:transform .18s ease,filter .18s ease}.user-box:hover img,.user-box:focus-visible img{transform:scale(1.16);filter:brightness(1.08)}body.dark .user-box img,body.dark .user-box:hover img,body.dark .user-box:focus-visible img{filter:brightness(0) invert(1)}.dashboard-actions .btn,.actions .btn,.overview-row.balance+div .btn{transition:transform .18s ease,filter .18s ease,box-shadow .18s ease}.dashboard-actions .btn:hover,.dashboard-actions .btn:focus-visible,.actions .btn:hover,.actions .btn:focus-visible,.overview-row.balance+div .btn:hover,.overview-row.balance+div .btn:focus-visible{transform:scale(1.07);filter:brightness(1.08);box-shadow:0 5px 14px rgba(0,0,0,.18)}";
-  sharedStyle.textContent += ".topbar>.user-box{margin-left:auto}.profile-page-actions{margin-left:auto;display:flex;align-items:center;gap:16px}.profile-page-icon{width:40px;height:40px;object-fit:contain;transition:transform .18s ease,filter .18s ease}.profile-page-icon:hover{transform:scale(1.16)}body.dark .profile-page-icon{filter:brightness(0) invert(1)}";
+  sharedStyle.textContent = ".topbar{position:relative}.topbar h2{position:absolute;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap}.user-box img{transition:transform .18s ease,filter .18s ease}.user-box:hover img,.user-box:focus-visible img{transform:scale(1.16);filter:brightness(1.08)}html.dark body .user-box img,html.dark body .user-box:hover img,html.dark body .user-box:focus-visible img,body.dark .user-box img,body.dark .user-box:hover img,body.dark .user-box:focus-visible img{filter:brightness(0) invert(1)}.dashboard-actions .btn,.actions .btn,.overview-row.balance+div .btn{transition:transform .18s ease,filter .18s ease,box-shadow .18s ease}.dashboard-actions .btn:hover,.dashboard-actions .btn:focus-visible,.actions .btn:hover,.actions .btn:focus-visible,.overview-row.balance+div .btn:hover,.overview-row.balance+div .btn:focus-visible{transform:scale(1.07);filter:brightness(1.08);box-shadow:0 5px 14px rgba(0,0,0,.18)}";
+  sharedStyle.textContent += ".topbar>.user-box{margin-left:auto}.profile-page-actions{margin-left:auto;display:flex;align-items:center;gap:16px}.profile-page-icon{width:40px;height:40px;object-fit:contain;transition:transform .18s ease,filter .18s ease}.profile-page-icon:hover{transform:scale(1.16)}html.dark body .profile-page-icon,body.dark .profile-page-icon{filter:brightness(0) invert(1)}";
   document.head.appendChild(sharedStyle);
 
   const sidebar = document.querySelector(".sidebar");

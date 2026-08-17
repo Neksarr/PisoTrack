@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  <script>if(localStorage.getItem("pisotrackDark")==="true")document.documentElement.classList.add("dark");</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>PisoTrack - Home</title>
@@ -29,6 +30,7 @@
       color: var(--text)
     }
 
+    html.dark body,
     body.dark {
       --page: #17191c;
       --card: #23262a;
@@ -281,14 +283,18 @@
       min-width: 70px
     }
 
+    html.dark body .modal,
     body.dark .modal {
       background: rgba(0, 0, 0, .72)
     }
 
+    html.dark body .modal-box,
     body.dark .modal-box {
       background: #23272b
     }
 
+    html.dark body .modal-box .input,
+    html.dark body .modal-box .select,
     body.dark .modal-box .input,
     body.dark .modal-box .select {
       background: #2c3137;
@@ -548,7 +554,7 @@ body.nav-open .menu-toggle{left:266px}
       </div>
     </form>
   </div>
-  <script src="logout.js" defer></script>
+  <script src="logout.js?v=20260818-4" defer></script>
   <script
     type="module">import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js"; import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js"; import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
       const firebaseConfig = {
@@ -570,7 +576,7 @@ body.nav-open .menu-toggle{left:266px}
       async function saveTransactions(user, list) { const ref = doc(db, "users", user.uid, "appData", "default"); await setDoc(ref, { currentEmail: user.email, email: user.email, [transactionKey(user.email)]: JSON.stringify(list), updatedAt: Date.now() }, { merge: true }) }
       async function getSettings(user) { const { data } = await getAppData(user); return { currency: data.currency || "PHP", notifications: data.notifications !== false, dark: data.dark === true, phpPerUsd: typeof data.phpPerUsdNumber === "number" ? data.phpPerUsdNumber : 56.5 } }
       async function saveSettings(user, values) { const ref = doc(db, "users", user.uid, "appData", "default"); await setDoc(ref, { ...values, currentEmail: user.email, email: user.email, updatedAt: Date.now() }, { merge: true }) }
-      function applyDark(v) { document.body.classList.toggle("dark", !!v) }
+      function applyDark(v) { document.documentElement.classList.toggle("dark", !!v); if (document.body) document.body.classList.toggle("dark", !!v) }
       function fmtDate(ms) { return new Date(Number(ms)).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) }
       function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])) }
       function phtDateValue(date = new Date()) { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit" }).format(date) }
@@ -664,10 +670,12 @@ body.nav-open .menu-toggle{left:266px}
           currentUser = user;
           userNameElement.textContent = user.displayName || user.email;
           settings = await getSettings(user);
+          localStorage.setItem("pisotrackDark", String(settings.dark));
           applyDark(settings.dark);
           transactions = await getTransactions(user);
           renderDashboard();
         } catch (error) {
+          console.error(error);
           statusElement.textContent = "Could not load dashboard data. Please refresh and try again.";
           listElement.innerHTML = '<div class="empty">Unable to load transactions.</div>';
         }

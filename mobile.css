@@ -63,7 +63,7 @@
   }
   .mobile-bottom-nav a.active { color: var(--blue); background: rgba(77,109,135,.12); }
   .mobile-bottom-nav img { width: 25px; height: 25px; object-fit: contain; }
-  body.dark .mobile-bottom-nav img { filter: brightness(0) invert(1); }
+  html.dark body .mobile-bottom-nav img, body.dark .mobile-bottom-nav img { filter: brightness(0) invert(1); }
 
   /* Home */
   .dashboard { width: 100%; max-width: 440px !important; gap: 14px !important; margin-inline: auto; }
