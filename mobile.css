@@ -62,6 +62,7 @@
     font-weight: 700;
   }
   .mobile-bottom-nav a.active { color: var(--blue); background: rgba(77,109,135,.12); }
+  .mobile-bottom-nav a:hover, .mobile-bottom-nav a:focus-visible { color: var(--blue); background: rgba(77,109,135,.12); outline: none; }
   .mobile-bottom-nav img { width: 25px; height: 25px; object-fit: contain; }
   html.dark body .mobile-bottom-nav img, body.dark .mobile-bottom-nav img { filter: brightness(0) invert(1); }
 
