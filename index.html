@@ -158,6 +158,16 @@
       font-size: 22px
     }
 
+    .view-all-link {
+      transition: transform .18s ease, filter .18s ease
+    }
+
+    .view-all-link:hover,
+    .view-all-link:focus-visible {
+      transform: scale(1.08);
+      filter: brightness(1.08)
+    }
+
     .btn {
       border: 0;
       background: var(--blue);
@@ -523,7 +533,7 @@ body.nav-open .menu-toggle{left:266px}
       </section>
       <section class="panel" style="margin-top:24px">
         <div class="panel-head">
-          <h3>Spending Breakdown</h3><a class="btn secondary" href="transactions.html">View All</a>
+          <h3>Spending Breakdown</h3><a class="btn secondary view-all-link" href="transactions.html">View All</a>
         </div>
         <div id="list">
           <div class="empty">Loading...</div>
@@ -554,7 +564,7 @@ body.nav-open .menu-toggle{left:266px}
       </div>
     </form>
   </div>
-  <script src="logout.js?v=20260818-6" defer></script>
+  <script src="logout.js" defer></script>
   <script
     type="module">import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js"; import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js"; import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
       const firebaseConfig = {
@@ -581,6 +591,7 @@ body.nav-open .menu-toggle{left:266px}
       function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])) }
       function phtDateValue(date = new Date()) { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit" }).format(date) }
       function phtTimestamp(dateValue) { return new Date(dateValue + "T12:00:00+08:00").getTime() }
+      function maximumTransactionDate() { return phtDateValue(new Date(Date.now() + 86400000)) }
 
       const incomeCategories = ["Salary", "Allowance", "Business", "Freelance", "Bonus", "Gift", "Scholarship", "Investment", "Refund", "Other Income"];
       const expenseCategories = ["Food", "Transportation", "School", "Bills", "Shopping", "Entertainment", "Health", "Rent", "Utilities", "Internet / Load", "Personal Care", "Family", "Pet Expenses", "Debt / Loan", "Other Expense"];
@@ -646,6 +657,11 @@ body.nav-open .menu-toggle{left:266px}
         const category = isOther ? otherCategoryInput.value.trim() : categorySelect.value;
         if (!titleInput.value.trim() || !category || !amount || amount <= 0 || !dateInput.value) {
           messageBox.textContent = "Please complete all fields with a valid amount.";
+          messageBox.classList.add("show");
+          return;
+        }
+        if (dateInput.value > maximumTransactionDate()) {
+          messageBox.textContent = "This date is not valid because that day has not arrived yet. You may only select up to one day ahead.";
           messageBox.classList.add("show");
           return;
         }
