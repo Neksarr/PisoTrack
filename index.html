@@ -33,15 +33,15 @@
       <section class="dashboard">
         <div class="dash-card">
           <div class="card-label">Current Balance</div>
-          <div id="balance" class="card-amount">₱0</div>
+          <div id="balance" class="card-amount skeleton skeleton-amount" aria-label="Loading current balance">₱0</div>
         </div>
         <div class="dash-card small">
           <div class="card-label">Total Income</div>
-          <div id="income" class="card-amount">₱0</div>
+          <div id="income" class="card-amount skeleton skeleton-amount" aria-label="Loading total income">₱0</div>
         </div>
         <div class="dash-card small">
           <div class="card-label">Total Expenses</div>
-          <div id="expense" class="card-amount">₱0</div>
+          <div id="expense" class="card-amount skeleton skeleton-amount" aria-label="Loading total expenses">₱0</div>
         </div>
         <div class="dashboard-actions">
           <button class="btn" id="addIncome" type="button">+ Add Income</button>
@@ -52,8 +52,8 @@
         <div class="panel-head">
           <h3>Spending Breakdown</h3><a class="btn secondary view-all-link" href="transactions.html">View All</a>
         </div>
-        <div id="list">
-          <div class="empty">Loading...</div>
+        <div id="list" aria-busy="true">
+          <div class="skeleton skeleton-row" aria-hidden="true"></div><div class="skeleton skeleton-row" aria-hidden="true"></div><div class="skeleton skeleton-row" aria-hidden="true"></div>
         </div>
         <div id="status" class="status"></div>
       </section>

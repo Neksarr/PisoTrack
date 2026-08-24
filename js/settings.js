@@ -137,7 +137,9 @@
       let user, s;
       function paint() {
         currency.value = s.currency;
+        currency.classList.remove("skeleton", "skeleton-control");
         darkMode.classList.toggle("on", s.dark);
+        darkMode.classList.remove("skeleton");
         applyDark(s.dark);
       }
       currency.onchange = async () => {
@@ -175,5 +177,6 @@
         }
         paint();
         syncStatus.textContent = "Data saves automatically";
+        syncStatus.classList.remove("skeleton", "skeleton-text");
+        document.querySelector(".settings-list")?.setAttribute("aria-busy", "false");
       });
-    

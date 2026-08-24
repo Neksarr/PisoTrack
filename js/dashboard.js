@@ -39,6 +39,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/fireba
       const listElement = document.getElementById("list"), statusElement = document.getElementById("status");
       let currentUser, settings, transactions = [], transactionType = "income";
 
+      function finishDashboardLoading() {
+        [balanceElement, incomeElement, expenseElement].forEach(element => element.classList.remove("skeleton", "skeleton-amount"));
+        listElement.setAttribute("aria-busy", "false");
+      }
+
       function renderDashboard() {
         let inc = 0, exp = 0;
         transactions.forEach(t => t.type === "income" ? inc += Number(t.amount || 0) : exp += Number(t.amount || 0));
@@ -47,6 +52,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/fireba
         balanceElement.textContent = money(inc - exp, settings.currency, settings.phpPerUsd);
         const recent = transactions.slice(-5).reverse();
         listElement.innerHTML = recent.length ? recent.map(t => `<div class="transaction"><span>${esc(t.title || t.category || "Transaction")}</span><span>${t.type === "income" ? "+" : "-"}${money(t.amount, settings.currency, settings.phpPerUsd)}</span></div>`).join("") : '<div class="empty">No transactions yet.</div>';
+        finishDashboardLoading();
       }
 
       function openTransactionModal(type) {
@@ -126,5 +132,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/fireba
           console.error(error);
           statusElement.textContent = "Could not load dashboard data. Please refresh and try again.";
           listElement.innerHTML = '<div class="empty">Unable to load transactions.</div>';
+          finishDashboardLoading();
         }
       });

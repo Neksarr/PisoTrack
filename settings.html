@@ -36,13 +36,13 @@
             ><img src="profileicon.png" /><span id="userName">User</span></a
           >
         </div>
-        <div class="settings-list">
+        <div class="settings-list" aria-busy="true">
           <div class="setting-row">
             <div>
               <div class="setting-title">Currency</div>
               <div class="setting-sub">Choose how amounts are displayed.</div>
             </div>
-            <select id="currency" class="select">
+            <select id="currency" class="select skeleton skeleton-control" aria-label="Loading currency setting">
               <option>PHP</option>
               <option>USD</option>
             </select>
@@ -54,7 +54,7 @@
                 PisoTrack data saves automatically to Firebase.
               </div>
             </div>
-            <div id="syncStatus" style="text-align: right; font-weight: bold">
+            <div id="syncStatus" class="skeleton skeleton-text" style="text-align: right; font-weight: bold" aria-label="Loading sync status">
               Connected
             </div>
           </div>
@@ -63,7 +63,7 @@
               <div class="setting-title">Dark Mode / White Mode</div>
               <div class="setting-sub">Switch the website appearance.</div>
             </div>
-            <div id="darkMode" class="switch"></div>
+            <div id="darkMode" class="switch skeleton" aria-label="Loading theme setting"></div>
           </div>
           <div class="setting-row">
             <div>

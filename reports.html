@@ -38,7 +38,7 @@
         </div>
         <div class="report-controls">
           <button id="prev" class="btn secondary">&lt;</button>
-          <div id="monthLabel" class="month-label"></div>
+          <div id="monthLabel" class="month-label skeleton skeleton-text" aria-label="Loading report month"></div>
           <button id="next" class="btn secondary">&gt;</button
           ><select id="graphType" class="select">
             <option value="expense">Total Expenses</option>
@@ -48,11 +48,11 @@
             <option value="bar">Bar Graph</option>
           </select>
         </div>
-        <div class="report-grid">
+        <div class="report-grid" aria-busy="true">
           <section class="chart-card">
             <h3 id="chartTitle">Total Expenses</h3>
             <div class="donut-wrap">
-              <div id="donut" class="donut">
+              <div id="donut" class="donut skeleton skeleton-chart" aria-hidden="true">
                 <div id="centerText" class="center-text"></div>
               </div>
               <div id="barChart" class="bar-chart" hidden>
@@ -60,18 +60,18 @@
                 <div id="barColumns" class="bar-columns"></div>
               </div>
             </div>
-            <div id="legend" class="legend"></div>
+            <div id="legend" class="legend skeleton skeleton-legend" aria-hidden="true"></div>
           </section>
           <section class="panel">
             <h3>Spending Overview</h3>
             <div class="overview-row">
-              <span>Total Income</span><span id="inc">₱0</span>
+              <span>Total Income</span><span id="inc" class="skeleton skeleton-amount">₱0</span>
             </div>
             <div class="overview-row">
-              <span>Total Expenses</span><span id="exp">₱0</span>
+              <span>Total Expenses</span><span id="exp" class="skeleton skeleton-amount">₱0</span>
             </div>
             <div class="overview-row balance">
-              <span>Balance</span><span id="bal">₱0</span>
+              <span>Balance</span><span id="bal" class="skeleton skeleton-amount">₱0</span>
             </div>
             <div style="display: flex; gap: 12px; margin-top: 22px">
               <a class="btn secondary" href="transactions.html">+ Add Expense</a
