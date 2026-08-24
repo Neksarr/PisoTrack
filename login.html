@@ -1,38 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PisoTrack - Login</title><link rel="icon" href="pisotrack.png"><style>
-*{box-sizing:border-box}
-:root{--blue:#4d6d87;--light-blue:#8cb3d2;--page:#eef1f4;--card:#fff;--cream:#fbfbf7;--text:#111;--muted:#747b82;--border:#dfe4e7}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--page);color:var(--text)}
-body.dark{--page:#17191c;--card:#23262a;--cream:#2c3035;--text:#f5f5f5;--muted:#b7bcc2;--border:#3a3f45}
-.layout{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
-.sidebar{background:var(--blue);color:#fff;padding:28px 20px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.brand{display:flex;align-items:center;gap:12px;margin-bottom:40px}.brand img{width:48px;height:48px;object-fit:contain;border-radius:10px}.brand h1{margin:0;font-size:25px}
-.nav-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;margin-bottom:8px;color:#fff;text-decoration:none;font-weight:bold}
-.nav-item:hover,.nav-item.active{background:rgba(255,255,255,.16)}.nav-item img{width:25px;height:25px;object-fit:contain;filter:brightness(0) invert(1)}
-.sidebar-bottom{margin-top:auto;font-size:12px;opacity:.8;padding:10px 16px}
-.main{padding:30px 36px 45px;min-width:0}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}.topbar h2{margin:0;font-size:30px}
-.user-box{display:flex;align-items:center;gap:10px;color:var(--blue);font-weight:bold;text-decoration:none}.user-box img{width:40px;height:40px;object-fit:contain}
-.panel{background:var(--card);border-radius:20px;padding:24px;box-shadow:0 5px 18px rgba(0,0,0,.05)}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.panel-head h3{margin:0;font-size:22px}
-.btn{border:0;background:var(--blue);color:#fff;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:bold;cursor:pointer}.btn.secondary{background:transparent;color:var(--blue);border:1px solid var(--blue)}.btn.danger{background:#a64040}
-.input,.select{width:100%;height:48px;border:1px solid var(--border);background:var(--cream);color:var(--text);border-radius:12px;padding:0 14px;font-size:15px;outline:none}
-label{display:block;font-weight:bold;margin:12px 0 7px}.message{display:none;padding:11px 13px;border-radius:10px;margin:0 0 14px;font-size:14px}.message.show{display:block}.message.error{background:#ffe6e6;color:#8a1f1f}.message.success{background:#e4f6e9;color:#176235}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.58);display:none;align-items:center;justify-content:center;padding:24px;z-index:50}.modal.open{display:flex}
-.modal-box{width:min(520px,100%);background:var(--card);color:var(--text);border-radius:20px;padding:24px;max-height:92vh;overflow:auto}.modal-box h3{margin:0 0 12px;font-size:24px}.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
-.empty{text-align:center;color:var(--muted);padding:34px}.status{font-size:12px;color:var(--muted);margin-top:12px}
-@media(max-width:950px){.layout{grid-template-columns:1fr}.sidebar{display:none}.main{padding:24px}}
-
-body{background:#fff}.page{min-height:100vh;display:grid;grid-template-columns:46% 54%}.brand-panel{background:var(--blue);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px}
-.brand-panel img{width:230px;max-width:62%;margin-bottom:20px;border-radius:28px}.brand-panel h1{font-size:54px;margin:0 0 10px}.brand-panel p{font-size:22px;line-height:1.45;margin:0}
-.login-panel{display:flex;align-items:center;justify-content:center;padding:50px;background:#fff}.login-card{width:100%;max-width:560px}.login-card h2{font-size:40px;margin:0 0 5px;font-weight:500}.subtitle{color:#888;margin-bottom:28px}
-.field{height:62px;border-radius:18px;background:#f7f7f2;display:flex;align-items:center;gap:14px;padding:0 18px;border:1px solid #ecece8}.field img{width:27px;height:27px;object-fit:contain}.field input{width:100%;border:0;background:transparent;outline:0;font-size:18px}
-.password-toggle{flex:0 0 40px;width:40px;height:40px;border:0;border-radius:10px;background:transparent;padding:6px;display:grid;place-items:center;cursor:pointer;transition:background .18s ease,transform .18s ease}.password-toggle img{width:27px;height:27px}.password-toggle:hover,.password-toggle:focus-visible{background:rgba(77,109,135,.18);transform:scale(1.08)}
-.signup-password-field{position:relative}.signup-password-field .input{padding-right:58px}.signup-password-field .password-toggle{position:absolute;right:5px;top:4px}
-.forgot{display:block;text-align:right;margin:8px 0 18px;color:var(--blue);text-decoration:none}.main-btn{width:100%;height:58px;border:0;border-radius:15px;background:var(--blue);color:#fff;font-size:19px;cursor:pointer}
-.or{text-align:center;color:#888;margin:18px 0 10px}.social-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.social{height:58px;border:2px solid #d4d9dc;border-radius:16px;background:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}.social img{width:28px;height:28px}
-.signup-line{text-align:center;color:var(--blue);margin-top:22px}.signup-line button{border:0;background:none;color:var(--blue);font:inherit;font-weight:bold;cursor:pointer}
-.resend-verification{display:none;margin:10px auto 18px;border:1px solid var(--blue);background:transparent;color:var(--blue);border-radius:12px;padding:10px 15px;font-weight:bold;cursor:pointer}.resend-verification.show{display:block}
-@media(max-width:900px){.page{grid-template-columns:1fr}.brand-panel{min-height:310px}}
-</style></head><body><div class="page"><section class="brand-panel"><img src="pisotrack.png"><h1>PisoTrack</h1><p>Track your spending. Save more.<br>Achieve your goals.</p></section>
+<title>PisoTrack - Login</title><link rel="icon" href="pisotrack.png"><!-- Styles extracted without changing cascade order. -->
+<link rel="stylesheet" href="css/login.css"></head><body><div class="page"><section class="brand-panel"><img src="pisotrack.png"><h1>PisoTrack</h1><p>Track your spending. Save more.<br>Achieve your goals.</p></section>
 <section class="login-panel"><div class="login-card"><h2>Welcome Back!</h2><div class="subtitle">Login to continue managing your budget</div><div id="loginMessage" class="message"></div><button id="resendVerification" class="resend-verification" type="button">Resend Verification Email</button>
 <label>Email</label><div class="field"><img src="mailicon.png"><input id="email" type="email" placeholder="Enter your email"></div>
 <label>Password</label><div class="field"><img src="lockicon.png"><input id="password" type="password" placeholder="Enter your password"><button id="passwordToggle" class="password-toggle" type="button" aria-label="Show password"><img src="eyeofficon.png" alt=""></button></div>
@@ -41,41 +9,4 @@ body{background:#fff}.page{min-height:100vh;display:grid;grid-template-columns:4
 <div class="signup-line">Don't have an account? <button id="openSignup">Sign Up</button></div></div></section></div>
 <div class="modal" id="signupModal"><div class="modal-box"><h3>Create Account</h3><div id="signupMessage" class="message"></div><label>Name</label><input class="input" id="signupName"><label>Email</label><input class="input" id="signupEmail" type="email"><label>Password</label><div class="signup-password-field"><input class="input" id="signupPassword" type="password"><button class="password-toggle" id="signupPasswordToggle" type="button" aria-label="Show password"><img src="eyeofficon.png" alt=""></button></div><label>Confirm Password</label><div class="signup-password-field"><input class="input" id="signupConfirm" type="password"><button class="password-toggle" id="signupConfirmToggle" type="button" aria-label="Show confirmed password"><img src="eyeofficon.png" alt=""></button></div><div class="modal-actions"><button class="btn secondary" id="cancelSignup">Cancel</button><button class="btn" id="signupBtn">Sign Up</button></div></div></div>
 <link rel="stylesheet" href="mobile.css">
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import {getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,sendEmailVerification,signOut,updateProfile} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBv2m_ciaohvHg7xCqkSWeTM_TfiphzMqw",
-  authDomain: "pisotrack-e61d6.firebaseapp.com",
-  projectId: "pisotrack-e61d6",
-  storageBucket: "pisotrack-e61d6.firebasestorage.app",
-  messagingSenderId: "492013865042",
-  appId: "1:492013865042:web:e0ccf6e2bee76aab32f78b"
-};
-
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);const lm=loginMessage,sm=signupMessage,modal=signupModal;
-passwordToggle.onclick=()=>{const showing=password.type==="text";password.type=showing?"password":"text";passwordToggle.querySelector("img").src=showing?"eyeofficon.png":"eyeshowicon.png";passwordToggle.setAttribute("aria-label",showing?"Show password":"Hide password")};
-function setupPasswordToggle(input,toggle,label="password"){toggle.onclick=()=>{const showing=input.type==="text";input.type=showing?"password":"text";toggle.querySelector("img").src=showing?"eyeofficon.png":"eyeshowicon.png";toggle.setAttribute("aria-label",showing?`Show ${label}`:`Hide ${label}`)}}
-setupPasswordToggle(signupPassword,signupPasswordToggle);setupPasswordToggle(signupConfirm,signupConfirmToggle,"confirmed password");
-function show(el,t,type="error"){el.textContent=t;el.className="message show "+type}
-function friendly(error){console.error(error);const code=error?.code||"";if(code.includes("invalid-credential"))return"Incorrect email or password.";if(code.includes("email-already-in-use"))return"That email is already registered.";if(code.includes("invalid-email"))return"Enter a valid email.";if(code.includes("weak-password"))return"Password is too weak.";if(code.includes("too-many-requests"))return"Too many attempts. Please wait and try again.";if(code.includes("network-request-failed"))return"Unable to connect. Check your internet connection and try again.";return"Unable to complete the request. Please try again."}
-function safeEmailKey(email){return String(email||"guest").replaceAll("@","_at_").replaceAll(".","_dot_").replaceAll("+","_plus_")}
-async function initializeVerifiedUser(user){
-  await setDoc(doc(db,"users",user.uid),{uid:user.uid,name:user.displayName||"User",email:user.email},{merge:true});
-  const appDataRef=doc(db,"users",user.uid,"appData","default"),snapshot=await getDoc(appDataRef),existingData=snapshot.exists()?snapshot.data():{},transactionField="transactions_"+safeEmailKey(user.email);
-  const initialData={currentEmail:user.email,email:user.email,updatedAt:Date.now()};
-  if(!Object.prototype.hasOwnProperty.call(existingData,"currency"))initialData.currency="PHP";
-  if(!Object.prototype.hasOwnProperty.call(existingData,"dark"))initialData.dark=false;
-  if(!Object.prototype.hasOwnProperty.call(existingData,transactionField))initialData[transactionField]="[]";
-  await setDoc(appDataRef,initialData,{merge:true});
-}
-let unverifiedCredentials=null;
-loginBtn.onclick=async()=>{resendVerification.classList.remove("show");try{const em=email.value.trim(),pw=password.value;const result=await signInWithEmailAndPassword(auth,em,pw);if(!result.user.emailVerified){unverifiedCredentials={email:em,password:pw};await signOut(auth);show(lm,"Please verify your email first before logging in.");resendVerification.classList.add("show");return}await initializeVerifiedUser(result.user);location.href="index.html"}catch(e){const code=e.code||"";if(code.includes("invalid-credential")||code.includes("user-not-found")){console.error(e);show(lm,"We couldn't find a matching account. If you haven't registered yet, click Sign Up below to create an account.","success")}else show(lm,friendly(e))}};
-resendVerification.onclick=async()=>{if(!unverifiedCredentials)return show(lm,"Enter your email and password, then log in again.");resendVerification.disabled=true;try{const result=await signInWithEmailAndPassword(auth,unverifiedCredentials.email,unverifiedCredentials.password);await sendEmailVerification(result.user,{url:new URL("login.html",location.href).href});await signOut(auth);show(lm,"A new verification email has been sent.","success")}catch(e){show(lm,friendly(e))}finally{resendVerification.disabled=false}};
-forgot.onclick=async e=>{e.preventDefault();if(!email.value.trim())return show(lm,"Enter your email first.");try{await sendPasswordResetEmail(auth,email.value.trim(),{url:new URL("login.html",location.href).href});show(lm,"Password reset email sent.","success")}catch(err){show(lm,friendly(err))}};
-openSignup.onclick=()=>modal.classList.add("open");cancelSignup.onclick=()=>modal.classList.remove("open");
-signupBtn.onclick=async()=>{const n=signupName.value.trim(),em=signupEmail.value.trim(),pw=signupPassword.value,cp=signupConfirm.value;if(!n||!em||!pw||!cp)return show(sm,"Complete all fields.");if(pw.length<8)return show(sm,"Password must be at least 8 characters.");if(pw!==cp)return show(sm,"Passwords do not match.");signupBtn.disabled=true;try{const result=await createUserWithEmailAndPassword(auth,em,pw);await updateProfile(result.user,{displayName:n});await sendEmailVerification(result.user,{url:new URL("login.html",location.href).href});await signOut(auth);show(sm,"Account created successfully. Please check your email and verify your account before logging in.","success");signupName.value="";signupEmail.value="";signupPassword.value="";signupConfirm.value=""}catch(e){if(auth.currentUser){try{await signOut(auth)}catch(signOutError){console.error(signOutError)}}show(sm,friendly(e))}finally{signupBtn.disabled=false}};
-googleBtn.onclick=()=>show(lm,"Google login is not connected yet.");appleBtn.onclick=()=>show(lm,"Apple login is not connected yet.");
-</script></body></html>
+<script type="module" src="js/login.js"></script></body></html>
