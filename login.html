@@ -1,12 +1,108 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PisoTrack - Login</title><link rel="icon" href="pisotrack.png"><!-- Styles extracted without changing cascade order. -->
-<link rel="stylesheet" href="css/login.css"></head><body><div class="page"><section class="brand-panel"><img src="pisotrack.png"><h1>PisoTrack</h1><p>Track your spending. Save more.<br>Achieve your goals.</p></section>
-<section class="login-panel"><div class="login-card"><h2>Welcome Back!</h2><div class="subtitle">Login to continue managing your budget</div><div id="loginMessage" class="message"></div><button id="resendVerification" class="resend-verification" type="button">Resend Verification Email</button>
-<label>Email</label><div class="field"><img src="mailicon.png"><input id="email" type="email" placeholder="Enter your email"></div>
-<label>Password</label><div class="field"><img src="lockicon.png"><input id="password" type="password" placeholder="Enter your password"><button id="passwordToggle" class="password-toggle" type="button" aria-label="Show password"><img src="eyeofficon.png" alt=""></button></div>
-<a id="forgot" class="forgot" href="#">Forgot Password?</a><button id="loginBtn" class="main-btn">Login</button><div class="or">Or</div>
-<div class="social-row"><button class="social" id="googleBtn"><img src="googleicon.png">Continue with Google</button><button class="social" id="appleBtn"><img src="appleiosicon.png">Continue with Apple</button></div>
-<div class="signup-line">Don't have an account? <button id="openSignup">Sign Up</button></div></div></section></div>
-<div class="modal" id="signupModal"><div class="modal-box"><h3>Create Account</h3><div id="signupMessage" class="message"></div><label>Name</label><input class="input" id="signupName"><label>Email</label><input class="input" id="signupEmail" type="email"><label>Password</label><div class="signup-password-field"><input class="input" id="signupPassword" type="password"><button class="password-toggle" id="signupPasswordToggle" type="button" aria-label="Show password"><img src="eyeofficon.png" alt=""></button></div><label>Confirm Password</label><div class="signup-password-field"><input class="input" id="signupConfirm" type="password"><button class="password-toggle" id="signupConfirmToggle" type="button" aria-label="Show confirmed password"><img src="eyeofficon.png" alt=""></button></div><div class="modal-actions"><button class="btn secondary" id="cancelSignup">Cancel</button><button class="btn" id="signupBtn">Sign Up</button></div></div></div>
-<link rel="stylesheet" href="mobile.css">
-<script type="module" src="js/login.js"></script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PisoTrack - Login</title>
+    <link rel="icon" href="pisotrack.png" />
+    <!-- Styles extracted without changing cascade order. -->
+    <link rel="stylesheet" href="css/login.css" />
+  </head>
+  <body>
+    <div class="page">
+      <section class="brand-panel">
+        <img src="pisotrack.png" />
+        <h1>PisoTrack</h1>
+        <p>Track your spending. Save more.<br />Achieve your goals.</p>
+      </section>
+      <section class="login-panel">
+        <div class="login-card">
+          <h2>Welcome Back!</h2>
+          <div class="subtitle">Login to continue managing your budget</div>
+          <div id="loginMessage" class="message"></div>
+          <button
+            id="resendVerification"
+            class="resend-verification"
+            type="button"
+          >
+            Resend Verification Email
+          </button>
+          <label>Email</label>
+          <div class="field">
+            <img src="mailicon.png" /><input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+            />
+          </div>
+          <label>Password</label>
+          <div class="field">
+            <img src="lockicon.png" /><input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+            /><button
+              id="passwordToggle"
+              class="password-toggle"
+              type="button"
+              aria-label="Show password"
+            >
+              <img src="eyeofficon.png" alt="" />
+            </button>
+          </div>
+          <a id="forgot" class="forgot" href="#">Forgot Password?</a
+          ><button id="loginBtn" class="main-btn">Login</button>
+          <div class="or">Or</div>
+          <div class="social-row">
+            <button class="social" id="googleBtn">
+              <img src="googleicon.png" />Continue with Google</button
+            ><button class="social" id="appleBtn">
+              <img src="appleiosicon.png" />Continue with Apple
+            </button>
+          </div>
+          <div class="signup-line">
+            Don't have an account? <button id="openSignup">Sign Up</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="modal" id="signupModal">
+      <div class="modal-box">
+        <h3>Create Account</h3>
+        <div id="signupMessage" class="message"></div>
+        <label>Name</label><input class="input" id="signupName" /><label
+          >Email</label
+        ><input class="input" id="signupEmail" type="email" /><label
+          >Password</label
+        >
+        <div class="signup-password-field">
+          <input class="input" id="signupPassword" type="password" /><button
+            class="password-toggle"
+            id="signupPasswordToggle"
+            type="button"
+            aria-label="Show password"
+          >
+            <img src="eyeofficon.png" alt="" />
+          </button>
+        </div>
+        <label>Confirm Password</label>
+        <div class="signup-password-field">
+          <input class="input" id="signupConfirm" type="password" /><button
+            class="password-toggle"
+            id="signupConfirmToggle"
+            type="button"
+            aria-label="Show confirmed password"
+          >
+            <img src="eyeofficon.png" alt="" />
+          </button>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="cancelSignup">Cancel</button
+          ><button class="btn" id="signupBtn">Sign Up</button>
+        </div>
+      </div>
+    </div>
+    <link rel="stylesheet" href="mobile.css" />
+    <script type="module" src="js/login.js"></script>
+  </body>
+</html>

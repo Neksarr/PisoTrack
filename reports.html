@@ -1,8 +1,90 @@
-<!doctype html><html><head><script src="js/theme-init.js"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PisoTrack - Reports</title><link rel="icon" href="pisotrack.png"><!-- Styles extracted without changing cascade order. -->
-<link rel="stylesheet" href="css/reports.css">
-<link rel="stylesheet" href="mobile.css?v=20260818-5">
-<link rel="stylesheet" href="css/global.css"></head><body><div class="layout"><aside class="sidebar"><div class="brand"><img src="pisotrack.png" alt=""><h1>PisoTrack</h1></div><a class="nav-item" href="index.html"><img src="homeicon.png" alt="">Home</a><a class="nav-item" href="transactions.html"><img src="purchaseicon.png" alt="">Transactions</a><a class="nav-item active" href="reports.html"><img src="reporticon.png" alt="">Reports</a><a class="nav-item" href="settings.html"><img src="settingicon.png" alt="">Settings</a><div class="sidebar-bottom">PisoTrack Desktop</div></aside>
-<main class="main"><div class="topbar"><h2>Reports</h2><a class="user-box" href="users.html"><img src="profileicon.png"><span id="userName">User</span></a></div><div class="report-controls"><button id="prev" class="btn secondary">&lt;</button><div id="monthLabel" class="month-label"></div><button id="next" class="btn secondary">&gt;</button><select id="graphType" class="select"><option value="expense">Total Expenses</option><option value="income">Total Income</option></select><select id="chartStyle" class="select"><option value="donut">Donut Chart</option><option value="bar">Bar Graph</option></select></div><div class="report-grid"><section class="chart-card"><h3 id="chartTitle">Total Expenses</h3><div class="donut-wrap"><div id="donut" class="donut"><div id="centerText" class="center-text"></div></div><div id="barChart" class="bar-chart" hidden><div id="barSummary" class="bar-summary"></div><div id="barColumns" class="bar-columns"></div></div></div><div id="legend" class="legend"></div></section><section class="panel"><h3>Spending Overview</h3><div class="overview-row"><span>Total Income</span><span id="inc">₱0</span></div><div class="overview-row"><span>Total Expenses</span><span id="exp">₱0</span></div><div class="overview-row balance"><span>Balance</span><span id="bal">₱0</span></div><div style="display:flex;gap:12px;margin-top:22px"><a class="btn secondary" href="transactions.html">+ Add Expense</a><a class="btn" href="transactions.html">+ Add Income</a></div></section></div></main></div>
-<script src="logout.js?v=20260818-7" defer></script>
-<script src="js/reports-controls.js"></script>
-<script type="module" src="js/reports.js"></script><script src="js/sidebar-menu.js"></script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <script src="js/theme-init.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PisoTrack - Reports</title>
+    <link rel="icon" href="pisotrack.png" />
+    <!-- Styles extracted without changing cascade order. -->
+    <link rel="stylesheet" href="css/reports.css" />
+    <link rel="stylesheet" href="mobile.css?v=20260818-5" />
+    <link rel="stylesheet" href="css/global.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="pisotrack.png" alt="" />
+          <h1>PisoTrack</h1>
+        </div>
+        <a class="nav-item" href="index.html"
+          ><img src="homeicon.png" alt="" />Home</a
+        ><a class="nav-item" href="transactions.html"
+          ><img src="purchaseicon.png" alt="" />Transactions</a
+        ><a class="nav-item active" href="reports.html"
+          ><img src="reporticon.png" alt="" />Reports</a
+        ><a class="nav-item" href="settings.html"
+          ><img src="settingicon.png" alt="" />Settings</a
+        >
+        <div class="sidebar-bottom">PisoTrack Desktop</div>
+      </aside>
+      <main class="main">
+        <div class="topbar">
+          <h2>Reports</h2>
+          <a class="user-box" href="users.html"
+            ><img src="profileicon.png" /><span id="userName">User</span></a
+          >
+        </div>
+        <div class="report-controls">
+          <button id="prev" class="btn secondary">&lt;</button>
+          <div id="monthLabel" class="month-label"></div>
+          <button id="next" class="btn secondary">&gt;</button
+          ><select id="graphType" class="select">
+            <option value="expense">Total Expenses</option>
+            <option value="income">Total Income</option></select
+          ><select id="chartStyle" class="select">
+            <option value="donut">Donut Chart</option>
+            <option value="bar">Bar Graph</option>
+          </select>
+        </div>
+        <div class="report-grid">
+          <section class="chart-card">
+            <h3 id="chartTitle">Total Expenses</h3>
+            <div class="donut-wrap">
+              <div id="donut" class="donut">
+                <div id="centerText" class="center-text"></div>
+              </div>
+              <div id="barChart" class="bar-chart" hidden>
+                <div id="barSummary" class="bar-summary"></div>
+                <div id="barColumns" class="bar-columns"></div>
+              </div>
+            </div>
+            <div id="legend" class="legend"></div>
+          </section>
+          <section class="panel">
+            <h3>Spending Overview</h3>
+            <div class="overview-row">
+              <span>Total Income</span><span id="inc">₱0</span>
+            </div>
+            <div class="overview-row">
+              <span>Total Expenses</span><span id="exp">₱0</span>
+            </div>
+            <div class="overview-row balance">
+              <span>Balance</span><span id="bal">₱0</span>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 22px">
+              <a class="btn secondary" href="transactions.html">+ Add Expense</a
+              ><a class="btn" href="transactions.html">+ Add Income</a>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script src="logout.js?v=20260818-7" defer></script>
+    <script src="js/reports-controls.js"></script>
+    <script type="module" src="js/reports.js"></script>
+    <script src="js/sidebar-menu.js"></script>
+  </body>
+</html>
+F
