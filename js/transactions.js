@@ -1,65 +1,689 @@
-import {initializeApp} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";import {getAuth,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyBv2m_ciaohvHg7xCqkSWeTM_TfiphzMqw",
   authDomain: "pisotrack-e61d6.firebaseapp.com",
   projectId: "pisotrack-e61d6",
   storageBucket: "pisotrack-e61d6.firebasestorage.app",
   messagingSenderId: "492013865042",
-  appId: "1:492013865042:web:e0ccf6e2bee76aab32f78b"
+  appId: "1:492013865042:web:e0ccf6e2bee76aab32f78b",
 };
 
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-function safeEmailKey(email){return String(email||"guest").replaceAll("@","_at_").replaceAll(".","_dot_").replaceAll("+","_plus_")}
-function transactionKey(email){return "transactions_"+safeEmailKey(email)}
-function normalizeTransactions(raw){if(Array.isArray(raw))return raw;if(typeof raw==="string"){try{const p=JSON.parse(raw);return Array.isArray(p)?p:[]}catch(e){return []}}return []}
-function money(v,currency="PHP",rate=56.5){if(currency==="USD")return "$"+(Number(v||0)/rate).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});return "₱"+Number(v||0).toLocaleString("en-PH",{minimumFractionDigits:0,maximumFractionDigits:2})}
-async function getAppData(user){const ref=doc(db,"users",user.uid,"appData","default"),snap=await getDoc(ref);return {ref,data:snap.exists()?snap.data():{}}}
-async function getTransactions(user){const {data}=await getAppData(user);return normalizeTransactions(data[transactionKey(user.email)]??data[transactionKey(data.currentEmail)]??data.transactions)}
-async function saveTransactions(user,list){const ref=doc(db,"users",user.uid,"appData","default");await setDoc(ref,{currentEmail:user.email,email:user.email,[transactionKey(user.email)]:JSON.stringify(list),updatedAt:Date.now()},{merge:true})}
-async function getSettings(user){const {data}=await getAppData(user);return {currency:data.currency||"PHP",notifications:data.notifications!==false,dark:data.dark===true,phpPerUsd:typeof data.phpPerUsdNumber==="number"?data.phpPerUsdNumber:56.5}}
-async function saveSettings(user,values){const ref=doc(db,"users",user.uid,"appData","default");await setDoc(ref,{...values,currentEmail:user.email,email:user.email,updatedAt:Date.now()},{merge:true})}
-function applyDark(v){document.documentElement.classList.toggle("dark",!!v);if(document.body)document.body.classList.toggle("dark",!!v)}
-function fmtDate(ms){return new Date(Number(ms)).toLocaleDateString("en-US",{timeZone:"Asia/Manila",month:"short",day:"2-digit",year:"numeric"})}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-async function loadHeaderProfile(user){try{const snapshot=await getDoc(doc(db,"users",user.uid)),profile=snapshot.exists()?snapshot.data():{},photo=profile.photoDataUrl||"profileicon.png",name=profile.name||user.displayName||"User";[topProfileImage,transactionProfileImage].forEach(image=>{image.src=photo;image.onerror=()=>{image.src="profileicon.png"}});transactionGreeting.textContent=`Hello, ${name}`}catch(error){console.error(error);topProfileImage.src="profileicon.png";transactionProfileImage.src="profileicon.png";transactionGreeting.textContent=`Hello, ${user.displayName||"User"}`}}
-function phtDateValue(date=new Date()){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Manila",year:"numeric",month:"2-digit",day:"2-digit"}).format(date)}function phtTimestamp(value){return new Date(value+"T12:00:00+08:00").getTime()}
-function pdfDate(ms){return new Date(Number(ms)).toLocaleDateString("en-US",{timeZone:"Asia/Manila",month:"long",day:"numeric",year:"numeric"})}
-function pdfNumericAmount(value){const amount=Number(typeof value==="string"?value.replace(/[^\d.-]/g,""):value??0);return Number.isFinite(amount)?amount:0}
-function pdfCurrencyAmount(value){return money(Math.abs(pdfNumericAmount(value)),settings.currency,settings.phpPerUsd)}
-function formatPdfIncome(value){return `+${pdfCurrencyAmount(value)}`}
-function formatPdfExpense(value){return `-${pdfCurrencyAmount(value)}`}
-function formatPdfBudget(value){const amount=pdfNumericAmount(value);return `${amount<0?"-":""}${pdfCurrencyAmount(amount)}`}
-function formatPdfTransactionAmount(transaction){return String(transaction?.type||"").toLowerCase()==="income"?formatPdfIncome(transaction?.amount):formatPdfExpense(transaction?.amount)}
-function pdfApi(){const api=window.jspdf?.jsPDF;if(!api)throw new Error("PDF library is unavailable. Check your connection and try again.");return api}
-function safeFilename(value){return String(value||"Transaction").replace(/[<>:"/\\|?*\x00-\x1F]/g,"_").replace(/\s+/g,"_").replace(/[._ ]+$/g,"").slice(0,80)||"Transaction"}
-function addPdfTransaction(pdf,t,y){pdf.setFont("helvetica","bold");pdf.text(`Title: ${String(t.title||"Transaction")}`,15,y);pdf.setFont("helvetica","normal");pdf.text(`Category: ${String(t.category||"Uncategorized")}`,15,y+7);pdf.text(`Amount: ${formatPdfTransactionAmount(t)}`,15,y+14);pdf.text(`Date Created: ${pdfDate(t.time)}`,15,y+21);pdf.text(`Type: ${t.type==="income"?"Income":"Expense"}`,15,y+28);return y+38}
-function downloadSingle(t){const PDF=pdfApi(),pdf=new PDF();pdf.setFontSize(17);pdf.text(String(t.title||"Transaction"),15,18);pdf.setFontSize(11);addPdfTransaction(pdf,t,32);pdf.save(`PisoTrack_${safeFilename(t.title)}_${phtDateValue(new Date(Number(t.time)))}.pdf`)}
-function shiftCalendarMonths(year,month,day,amount){const targetMonth=month+amount,targetYear=year+Math.floor(targetMonth/12),normalizedMonth=((targetMonth%12)+12)%12,lastDay=new Date(Date.UTC(targetYear,normalizedMonth+1,0)).getUTCDate();return Date.UTC(targetYear,normalizedMonth,Math.min(day,lastDay))-8*60*60*1000}
-function exportRangeBounds(range){const[year,month,day]=phtDateValue().split("-").map(Number),phtOffset=8*60*60*1000,tomorrow=Date.UTC(year,month-1,day+1)-phtOffset;switch(range){case"lastYear":return[Date.UTC(year-1,0,1)-phtOffset,Date.UTC(year,0,1)-phtOffset];case"last6Months":return[shiftCalendarMonths(year,month-1,day,-6),tomorrow];case"last3Months":return[shiftCalendarMonths(year,month-1,day,-3),tomorrow];case"lastMonth":return[Date.UTC(year,month-2,1)-phtOffset,Date.UTC(year,month-1,1)-phtOffset];default:throw new Error("Choose a valid export period.")}}
-function downloadHistory(range){const[start,end]=exportRangeBounds(range),selected=allTx.filter(t=>Number(t.time)>=start&&Number(t.time)<end),sorted=[...selected].sort((a,b)=>Number(b.time)-Number(a.time));if(!sorted.length)return false;const PDF=pdfApi(),pdf=new PDF();let income=0,expense=0,allIncome=0,allExpense=0;selected.forEach(t=>t.type==="income"?income+=Math.abs(pdfNumericAmount(t.amount)):expense+=Math.abs(pdfNumericAmount(t.amount)));allTx.forEach(t=>t.type==="income"?allIncome+=Math.abs(pdfNumericAmount(t.amount)):allExpense+=Math.abs(pdfNumericAmount(t.amount)));pdf.setFontSize(18);pdf.text("PisoTrack Transaction History",15,18);pdf.setFontSize(11);pdf.text(`Total Income: ${formatPdfIncome(income)}`,15,30);pdf.text(`Total Expense: ${formatPdfExpense(expense)}`,15,37);pdf.text(`Current Budget: ${formatPdfBudget(allIncome-allExpense)}`,15,44);let y=57;sorted.forEach(t=>{if(y>255){pdf.addPage();y=18}y=addPdfTransaction(pdf,t,y)});pdf.save(`PisoTrack_Transaction_History_${range}_${phtDateValue()}.pdf`);return true}
+const app = initializeApp(firebaseConfig),
+  auth = getAuth(app),
+  db = getFirestore(app);
+function safeEmailKey(email) {
+  return String(email || "guest")
+    .replaceAll("@", "_at_")
+    .replaceAll(".", "_dot_")
+    .replaceAll("+", "_plus_");
+}
+function transactionKey(email) {
+  return "transactions_" + safeEmailKey(email);
+}
+function normalizeTransactions(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const p = JSON.parse(raw);
+      return Array.isArray(p) ? p : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+}
+function money(v, currency = "PHP", rate = 56.5) {
+  if (currency === "USD")
+    return (
+      "$" +
+      (Number(v || 0) / rate).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    );
+  return (
+    "₱" +
+    Number(v || 0).toLocaleString("en-PH", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+  );
+}
+async function getAppData(user) {
+  const ref = doc(db, "users", user.uid, "appData", "default"),
+    snap = await getDoc(ref);
+  return { ref, data: snap.exists() ? snap.data() : {} };
+}
+async function getTransactions(user) {
+  const { data } = await getAppData(user);
+  return normalizeTransactions(
+    data[transactionKey(user.email)] ??
+      data[transactionKey(data.currentEmail)] ??
+      data.transactions,
+  );
+}
+async function saveTransactions(user, list) {
+  const ref = doc(db, "users", user.uid, "appData", "default");
+  await setDoc(
+    ref,
+    {
+      currentEmail: user.email,
+      email: user.email,
+      [transactionKey(user.email)]: JSON.stringify(list),
+      updatedAt: Date.now(),
+    },
+    { merge: true },
+  );
+}
+async function getSettings(user) {
+  const { data } = await getAppData(user);
+  return {
+    currency: data.currency || "PHP",
+    notifications: data.notifications !== false,
+    dark: data.dark === true,
+    phpPerUsd:
+      typeof data.phpPerUsdNumber === "number" ? data.phpPerUsdNumber : 56.5,
+  };
+}
+async function saveSettings(user, values) {
+  const ref = doc(db, "users", user.uid, "appData", "default");
+  await setDoc(
+    ref,
+    {
+      ...values,
+      currentEmail: user.email,
+      email: user.email,
+      updatedAt: Date.now(),
+    },
+    { merge: true },
+  );
+}
+function applyDark(v) {
+  document.documentElement.classList.toggle("dark", !!v);
+  if (document.body) document.body.classList.toggle("dark", !!v);
+}
+function fmtDate(ms) {
+  return new Date(Number(ms)).toLocaleDateString("en-US", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+}
+function esc(s) {
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+}
+async function loadHeaderProfile(user) {
+  try {
+    const snapshot = await getDoc(doc(db, "users", user.uid)),
+      profile = snapshot.exists() ? snapshot.data() : {},
+      photo = profile.photoDataUrl || "profileicon.png",
+      name = profile.name || user.displayName || "User";
+    [topProfileImage, transactionProfileImage].forEach((image) => {
+      image.src = photo;
+      image.onerror = () => {
+        image.src = "profileicon.png";
+      };
+    });
+    transactionGreeting.textContent = `Hello, ${name}`;
+  } catch (error) {
+    console.error(error);
+    topProfileImage.src = "profileicon.png";
+    transactionProfileImage.src = "profileicon.png";
+    transactionGreeting.textContent = `Hello, ${user.displayName || "User"}`;
+  }
+}
+function phtDateValue(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+function phtTimestamp(value) {
+  return new Date(value + "T12:00:00+08:00").getTime();
+}
+function pdfDate(ms) {
+  return new Date(Number(ms)).toLocaleDateString("en-US", {
+    timeZone: "Asia/Manila",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+function pdfNumericAmount(value) {
+  const amount = Number(
+    typeof value === "string" ? value.replace(/[^\d.-]/g, "") : (value ?? 0),
+  );
+  return Number.isFinite(amount) ? amount : 0;
+}
+function pdfCurrencyAmount(value) {
+  return money(
+    Math.abs(pdfNumericAmount(value)),
+    settings.currency,
+    settings.phpPerUsd,
+  );
+}
+function formatPdfIncome(value) {
+  return `+${pdfCurrencyAmount(value)}`;
+}
+function formatPdfExpense(value) {
+  return `-${pdfCurrencyAmount(value)}`;
+}
+function formatPdfBudget(value) {
+  const amount = pdfNumericAmount(value);
+  return `${amount < 0 ? "-" : ""}${pdfCurrencyAmount(amount)}`;
+}
+function formatPdfTransactionAmount(transaction) {
+  return String(transaction?.type || "").toLowerCase() === "income"
+    ? formatPdfIncome(transaction?.amount)
+    : formatPdfExpense(transaction?.amount);
+}
+function pdfApi() {
+  const api = window.jspdf?.jsPDF;
+  if (!api)
+    throw new Error(
+      "PDF library is unavailable. Check your connection and try again.",
+    );
+  return api;
+}
+function safeFilename(value) {
+  return (
+    String(value || "Transaction")
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+      .replace(/\s+/g, "_")
+      .replace(/[._ ]+$/g, "")
+      .slice(0, 80) || "Transaction"
+  );
+}
+function addPdfTransaction(pdf, t, y) {
+  pdf.setFont("helvetica", "bold");
+  pdf.text(`Title: ${String(t.title || "Transaction")}`, 15, y);
+  pdf.setFont("helvetica", "normal");
+  pdf.text(`Category: ${String(t.category || "Uncategorized")}`, 15, y + 7);
+  pdf.text(`Amount: ${formatPdfTransactionAmount(t)}`, 15, y + 14);
+  pdf.text(`Date Created: ${pdfDate(t.time)}`, 15, y + 21);
+  pdf.text(`Type: ${t.type === "income" ? "Income" : "Expense"}`, 15, y + 28);
+  return y + 38;
+}
+function downloadSingle(t) {
+  const PDF = pdfApi(),
+    pdf = new PDF();
+  pdf.setFontSize(17);
+  pdf.text(String(t.title || "Transaction"), 15, 18);
+  pdf.setFontSize(11);
+  addPdfTransaction(pdf, t, 32);
+  pdf.save(
+    `PisoTrack_${safeFilename(t.title)}_${phtDateValue(new Date(Number(t.time)))}.pdf`,
+  );
+}
+function shiftCalendarMonths(year, month, day, amount) {
+  const targetMonth = month + amount,
+    targetYear = year + Math.floor(targetMonth / 12),
+    normalizedMonth = ((targetMonth % 12) + 12) % 12,
+    lastDay = new Date(
+      Date.UTC(targetYear, normalizedMonth + 1, 0),
+    ).getUTCDate();
+  return (
+    Date.UTC(targetYear, normalizedMonth, Math.min(day, lastDay)) -
+    8 * 60 * 60 * 1000
+  );
+}
+function exportRangeBounds(range) {
+  const [year, month, day] = phtDateValue().split("-").map(Number),
+    phtOffset = 8 * 60 * 60 * 1000,
+    tomorrow = Date.UTC(year, month - 1, day + 1) - phtOffset;
+  switch (range) {
+    case "lastYear":
+      return [
+        Date.UTC(year - 1, 0, 1) - phtOffset,
+        Date.UTC(year, 0, 1) - phtOffset,
+      ];
+    case "last6Months":
+      return [shiftCalendarMonths(year, month - 1, day, -6), tomorrow];
+    case "last3Months":
+      return [shiftCalendarMonths(year, month - 1, day, -3), tomorrow];
+    case "lastMonth":
+      return [
+        Date.UTC(year, month - 2, 1) - phtOffset,
+        Date.UTC(year, month - 1, 1) - phtOffset,
+      ];
+    default:
+      throw new Error("Choose a valid export period.");
+  }
+}
+function downloadHistory(range) {
+  const [start, end] = exportRangeBounds(range),
+    selected = allTx.filter(
+      (t) => Number(t.time) >= start && Number(t.time) < end,
+    ),
+    sorted = [...selected].sort((a, b) => Number(b.time) - Number(a.time));
+  if (!sorted.length) return false;
+  const PDF = pdfApi(),
+    pdf = new PDF();
+  let income = 0,
+    expense = 0,
+    allIncome = 0,
+    allExpense = 0;
+  selected.forEach((t) =>
+    t.type === "income"
+      ? (income += Math.abs(pdfNumericAmount(t.amount)))
+      : (expense += Math.abs(pdfNumericAmount(t.amount))),
+  );
+  allTx.forEach((t) =>
+    t.type === "income"
+      ? (allIncome += Math.abs(pdfNumericAmount(t.amount)))
+      : (allExpense += Math.abs(pdfNumericAmount(t.amount))),
+  );
+  pdf.setFontSize(18);
+  pdf.text("PisoTrack Transaction History", 15, 18);
+  pdf.setFontSize(11);
+  pdf.text(`Total Income: ${formatPdfIncome(income)}`, 15, 30);
+  pdf.text(`Total Expense: ${formatPdfExpense(expense)}`, 15, 37);
+  pdf.text(
+    `Current Budget: ${formatPdfBudget(allIncome - allExpense)}`,
+    15,
+    44,
+  );
+  let y = 57;
+  sorted.forEach((t) => {
+    if (y > 255) {
+      pdf.addPage();
+      y = 18;
+    }
+    y = addPdfTransaction(pdf, t, y);
+  });
+  pdf.save(`PisoTrack_Transaction_History_${range}_${phtDateValue()}.pdf`);
+  return true;
+}
 
-let currentUser,allTx=[],settings,editingIndex=-1,currentType="expense";
-range.innerHTML='<option>All</option><option>Today</option><option>Last Week</option><option>This Week</option><option>This Month</option><option>Last Month</option><option>Last 3 Months</option><option>This Year</option>';range.value="All";
-function rangeBounds(){const[y,m,d]=phtDateValue().split("-").map(Number),dayMs=86400000,phtOffset=8*60*60*1000,today=Date.UTC(y,m-1,d),weekDay=(new Date(today).getUTCDay()+6)%7,thisWeek=today-weekDay*dayMs,toPht=calendarUtc=>calendarUtc-phtOffset;switch(range.value){case"Today":return[toPht(today),toPht(today+dayMs)];case"This Week":return[toPht(thisWeek),toPht(thisWeek+7*dayMs)];case"Last Week":return[toPht(thisWeek-7*dayMs),toPht(thisWeek)];case"This Month":return[toPht(Date.UTC(y,m-1,1)),toPht(Date.UTC(y,m,1))];case"Last Month":return[toPht(Date.UTC(y,m-2,1)),toPht(Date.UTC(y,m-1,1))];case"Last 3 Months":return[toPht(Date.UTC(y,m-3,1)),toPht(Date.UTC(y,m,1))];case"This Year":return[toPht(Date.UTC(y,0,1)),toPht(Date.UTC(y+1,0,1))];default:return[-Infinity,Infinity]}}
-function filtered(useSearch=true){const[start,end]=rangeBounds(),query=useSearch?searchTx.value.trim().toLowerCase():"";return allTx.map((t,i)=>({...t,_i:i})).filter(t=>{const date=new Date(Number(t.time)),searchable=[t.title,t.category,date.toLocaleDateString("en-US",{timeZone:"Asia/Manila",month:"long",day:"numeric",year:"numeric"}),date.toLocaleDateString("en-US",{timeZone:"Asia/Manila",month:"short",day:"numeric",year:"numeric"}),phtDateValue(date),date.toLocaleDateString("en-US",{timeZone:"Asia/Manila"})].join(" ").toLowerCase();return Number(t.time)>=start&&Number(t.time)<end&&(category.value==="All"||String(t.category).toLowerCase()===category.value.toLowerCase())&&(!query||searchable.includes(query))})}
-function transactionDateKey(ms){return phtDateValue(new Date(Number(ms)))}
-function transactionDateHeading(ms){return new Date(Number(ms)).toLocaleDateString("en-US",{timeZone:"Asia/Manila",month:"short",day:"numeric",year:"numeric"})}
-function render(){const f=filtered().sort((a,b)=>Number(b.time)-Number(a.time)||b._i-a._i);let inc=0,exp=0;allTx.forEach(t=>t.type==="income"?inc+=Number(t.amount):exp+=Number(t.amount));const balance=inc-exp;net.textContent=money(Math.abs(balance),settings.currency,settings.phpPerUsd);net.classList.remove("skeleton");let previousDate="";const history=f.map(t=>{const key=transactionDateKey(t.time),heading=key!==previousDate?`<h4 class="tx-date-heading">${transactionDateHeading(t.time)}</h4>`:"";previousDate=key;return heading+`<div class="tx-row"><div class="tx-title">${esc(t.title)} • ${esc(t.category)}</div><div class="tx-amount">${t.type==="income"?"+":"-"}${money(t.amount,settings.currency,settings.phpPerUsd)}</div><button class="btn secondary edit" data-i="${t._i}">Edit</button></div>`}).join("");list.innerHTML=f.length?`<div class="tx-history">${history}</div>`:'<div class="empty">No transactions for this filter.</div>';list.setAttribute("aria-busy","false");document.querySelectorAll(".edit").forEach(b=>b.onclick=()=>openEdit(Number(b.dataset.i)))}
-function fillCategories(){const cats=[...new Set(allTx.map(t=>t.category).filter(Boolean))].sort();category.innerHTML='<option>All</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join("")}
-const incomeCategories=["Salary","Allowance","Business","Freelance","Bonus","Gift","Scholarship","Investment","Refund","Other Income"],expenseCategories=["Food","Transportation","School","Bills","Shopping","Entertainment","Health","Rent","Utilities","Internet / Load","Personal Care","Family","Pet Expenses","Debt / Loan","Other Expense"];
-const oldCategoryInput=document.getElementById("txCategory"),txCategorySelect=document.createElement("select");txCategorySelect.id="txCategory";txCategorySelect.className="select";oldCategoryInput.replaceWith(txCategorySelect);const otherCategoryField=document.createElement("div");otherCategoryField.className="field-hidden";otherCategoryField.innerHTML='<label>Specify category</label><input id="txOtherCategory" class="input" maxlength="50">';txCategorySelect.insertAdjacentElement("afterend",otherCategoryField);const txOtherCategory=document.getElementById("txOtherCategory");
-function setTxCategories(type,value){const choices=type==="income"?incomeCategories:expenseCategories;txCategorySelect.innerHTML=choices.map(item=>`<option>${esc(item)}</option>`).join("");if(value&&!choices.includes(value)){txCategorySelect.insertAdjacentHTML("beforeend",`<option>${esc(value)}</option>`)}txCategorySelect.value=value||choices[0];toggleOtherCategory()}
-function toggleOtherCategory(){const other=txCategorySelect.value==="Other Income"||txCategorySelect.value==="Other Expense";otherCategoryField.classList.toggle("field-hidden",!other);txOtherCategory.required=other;if(!other)txOtherCategory.value=""}
-txCategorySelect.onchange=toggleOtherCategory;
-function maximumTransactionDate(){return phtDateValue(new Date(Date.now()+86400000))}
-function openAdd(type){editingIndex=-1;currentType=type;modal.classList.remove("editing");deleteTx.hidden=true;downloadTx.hidden=true;modalTitle.textContent=type==="income"?"Add Income":"Add Expense";txTitle.value="";setTxCategories(type);txAmount.value="";txDate.value=phtDateValue();txMessage.classList.remove("show");modal.classList.add("open")}
-function openEdit(i){editingIndex=i;const t=allTx[i];currentType=t.type;modal.classList.add("editing");deleteTx.hidden=false;downloadTx.hidden=false;modalTitle.textContent="Edit Transaction";txTitle.value=t.title;setTxCategories(t.type,t.category);if(t.category==="Other Income"||t.category==="Other Expense")txOtherCategory.value=t.category;txAmount.value=settings.currency==="USD"?(Number(t.amount)/settings.phpPerUsd).toFixed(2):Number(t.amount).toFixed(2);txDate.value=phtDateValue(new Date(Number(t.time)));txMessage.classList.remove("show");modal.classList.add("open")}
-addExpense.onclick=()=>openAdd("expense");addIncome.onclick=()=>openAdd("income");cancel.onclick=()=>modal.classList.remove("open");category.onchange=render;range.onchange=render;searchTx.oninput=render;
-downloadAll.onclick=()=>{downloadRangeMessage.classList.remove("show");downloadRangeModal.classList.add("open");downloadRangeModal.querySelector('input[name="downloadRange"]:checked')?.focus()};
-cancelDownloadRange.onclick=()=>downloadRangeModal.classList.remove("open");downloadRangeModal.onclick=event=>{if(event.target===downloadRangeModal)downloadRangeModal.classList.remove("open")};
-downloadRangeForm.onsubmit=event=>{event.preventDefault();downloadRangeMessage.classList.remove("show");const selected=downloadRangeForm.elements.downloadRange.value;try{if(!downloadHistory(selected)){downloadRangeMessage.textContent="No transactions found for this period.";downloadRangeMessage.classList.add("show");return}downloadRangeModal.classList.remove("open")}catch(error){console.error(error);downloadRangeMessage.textContent=error.message;downloadRangeMessage.classList.add("show")}};
-downloadTx.onclick=()=>{if(editingIndex>=0)try{downloadSingle(allTx[editingIndex])}catch(error){console.error(error);alert(error.message)}};
-document.addEventListener("keydown",event=>{if(event.key==="Escape"){downloadRangeModal.classList.remove("open");modal.classList.remove("open")}});
-save.onclick=async()=>{const amount=Number(txAmount.value),isOther=txCategorySelect.value.startsWith("Other "),selectedCategory=isOther?txOtherCategory.value.trim():txCategorySelect.value;if(!txTitle.value.trim()||!selectedCategory||!amount||!txDate.value)return;if(txDate.value>maximumTransactionDate()){txMessage.textContent="This date is not valid because that day has not arrived yet. You may only select up to one day ahead.";txMessage.classList.add("show");return}const php=settings.currency==="USD"?amount*settings.phpPerUsd:amount;const item={title:txTitle.value.trim(),category:selectedCategory,amount:php,type:currentType,time:phtTimestamp(txDate.value)};if(editingIndex>=0)allTx[editingIndex]=item;else allTx.push(item);await saveTransactions(currentUser,allTx);modal.classList.remove("open");fillCategories();render()};
-deleteTx.onclick=async()=>{if(editingIndex<0)return;const deleteIndex=editingIndex,transaction=allTx[deleteIndex],confirmed=await window.pisoTrackConfirm({title:"Delete Transaction?",message:`Are you sure you want to delete ${transaction.title||"this transaction"}? This action cannot be undone.`,confirmText:"Delete",danger:true});if(!confirmed)return;deleteTx.disabled=true;try{allTx.splice(deleteIndex,1);await saveTransactions(currentUser,allTx);modal.classList.remove("open");editingIndex=-1;fillCategories();render()}catch(error){allTx.splice(deleteIndex,0,transaction);console.error(error);txMessage.textContent="Could not delete the transaction. Please try again.";txMessage.classList.add("show")}finally{deleteTx.disabled=false}};
-onAuthStateChanged(auth,async user=>{if(!user)return location.href="login.html";if(!user.emailVerified){await signOut(auth);return location.href="login.html"}currentUser=user;userName.textContent=user.displayName||user.email;void loadHeaderProfile(user);try{settings=await getSettings(user);localStorage.setItem("pisotrackDark",String(settings.dark));applyDark(settings.dark)}catch(error){console.error(error);settings={currency:"PHP",notifications:true,dark:document.documentElement.classList.contains("dark"),phpPerUsd:56.5}}try{allTx=await getTransactions(user);fillCategories();render()}catch(error){console.error(error);net.classList.remove("skeleton");list.setAttribute("aria-busy","false");list.innerHTML='<div class="empty">Unable to load transactions.</div>'}});
+let currentUser,
+  allTx = [],
+  settings,
+  editingIndex = -1,
+  currentType = "expense";
+range.innerHTML =
+  "<option>All</option><option>Today</option><option>Last Week</option><option>This Week</option><option>This Month</option><option>Last Month</option><option>Last 3 Months</option><option>This Year</option>";
+range.value = "All";
+function rangeBounds() {
+  const [y, m, d] = phtDateValue().split("-").map(Number),
+    dayMs = 86400000,
+    phtOffset = 8 * 60 * 60 * 1000,
+    today = Date.UTC(y, m - 1, d),
+    weekDay = (new Date(today).getUTCDay() + 6) % 7,
+    thisWeek = today - weekDay * dayMs,
+    toPht = (calendarUtc) => calendarUtc - phtOffset;
+  switch (range.value) {
+    case "Today":
+      return [toPht(today), toPht(today + dayMs)];
+    case "This Week":
+      return [toPht(thisWeek), toPht(thisWeek + 7 * dayMs)];
+    case "Last Week":
+      return [toPht(thisWeek - 7 * dayMs), toPht(thisWeek)];
+    case "This Month":
+      return [toPht(Date.UTC(y, m - 1, 1)), toPht(Date.UTC(y, m, 1))];
+    case "Last Month":
+      return [toPht(Date.UTC(y, m - 2, 1)), toPht(Date.UTC(y, m - 1, 1))];
+    case "Last 3 Months":
+      return [toPht(Date.UTC(y, m - 3, 1)), toPht(Date.UTC(y, m, 1))];
+    case "This Year":
+      return [toPht(Date.UTC(y, 0, 1)), toPht(Date.UTC(y + 1, 0, 1))];
+    default:
+      return [-Infinity, Infinity];
+  }
+}
+function filtered(useSearch = true) {
+  const [start, end] = rangeBounds(),
+    query = useSearch ? searchTx.value.trim().toLowerCase() : "";
+  return allTx
+    .map((t, i) => ({ ...t, _i: i }))
+    .filter((t) => {
+      const date = new Date(Number(t.time)),
+        searchable = [
+          t.title,
+          t.category,
+          date.toLocaleDateString("en-US", {
+            timeZone: "Asia/Manila",
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          }),
+          date.toLocaleDateString("en-US", {
+            timeZone: "Asia/Manila",
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+          phtDateValue(date),
+          date.toLocaleDateString("en-US", { timeZone: "Asia/Manila" }),
+        ]
+          .join(" ")
+          .toLowerCase();
+      return (
+        Number(t.time) >= start &&
+        Number(t.time) < end &&
+        (category.value === "All" ||
+          String(t.category).toLowerCase() === category.value.toLowerCase()) &&
+        (!query || searchable.includes(query))
+      );
+    });
+}
+function transactionDateKey(ms) {
+  return phtDateValue(new Date(Number(ms)));
+}
+function transactionDateHeading(ms) {
+  return new Date(Number(ms)).toLocaleDateString("en-US", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+function render() {
+  const f = filtered().sort(
+    (a, b) => Number(b.time) - Number(a.time) || b._i - a._i,
+  );
+  let inc = 0,
+    exp = 0;
+  allTx.forEach((t) =>
+    t.type === "income" ? (inc += Number(t.amount)) : (exp += Number(t.amount)),
+  );
+  const balance = inc - exp;
+  net.textContent = money(
+    Math.abs(balance),
+    settings.currency,
+    settings.phpPerUsd,
+  );
+  net.classList.remove("skeleton");
+  let previousDate = "";
+  const history = f
+    .map((t) => {
+      const key = transactionDateKey(t.time),
+        heading =
+          key !== previousDate
+            ? `<h4 class="tx-date-heading">${transactionDateHeading(t.time)}</h4>`
+            : "";
+      previousDate = key;
+      return (
+        heading +
+        `<div class="tx-row"><div class="tx-title">${esc(t.title)} • ${esc(t.category)}</div><div class="tx-amount">${t.type === "income" ? "+" : "-"}${money(t.amount, settings.currency, settings.phpPerUsd)}</div><button class="btn secondary edit" data-i="${t._i}">Edit</button></div>`
+      );
+    })
+    .join("");
+  list.innerHTML = f.length
+    ? `<div class="tx-history">${history}</div>`
+    : '<div class="empty">No transactions for this filter.</div>';
+  list.setAttribute("aria-busy", "false");
+  document
+    .querySelectorAll(".edit")
+    .forEach((b) => (b.onclick = () => openEdit(Number(b.dataset.i))));
+}
+function fillCategories() {
+  const cats = [
+    ...new Set(allTx.map((t) => t.category).filter(Boolean)),
+  ].sort();
+  category.innerHTML =
+    "<option>All</option>" +
+    cats.map((c) => `<option>${esc(c)}</option>`).join("");
+}
+const incomeCategories = [
+    "Salary",
+    "Allowance",
+    "Business",
+    "Freelance",
+    "Bonus",
+    "Gift",
+    "Scholarship",
+    "Investment",
+    "Refund",
+    "Other Income",
+  ],
+  expenseCategories = [
+    "Food",
+    "Transportation",
+    "School",
+    "Bills",
+    "Shopping",
+    "Entertainment",
+    "Health",
+    "Rent",
+    "Utilities",
+    "Internet / Load",
+    "Personal Care",
+    "Family",
+    "Pet Expenses",
+    "Debt / Loan",
+    "Other Expense",
+  ];
+const oldCategoryInput = document.getElementById("txCategory"),
+  txCategorySelect = document.createElement("select");
+txCategorySelect.id = "txCategory";
+txCategorySelect.className = "select";
+oldCategoryInput.replaceWith(txCategorySelect);
+const otherCategoryField = document.createElement("div");
+otherCategoryField.className = "field-hidden";
+otherCategoryField.innerHTML =
+  '<label>Specify category</label><input id="txOtherCategory" class="input" maxlength="50">';
+txCategorySelect.insertAdjacentElement("afterend", otherCategoryField);
+const txOtherCategory = document.getElementById("txOtherCategory");
+function setTxCategories(type, value) {
+  const choices = type === "income" ? incomeCategories : expenseCategories;
+  txCategorySelect.innerHTML = choices
+    .map((item) => `<option>${esc(item)}</option>`)
+    .join("");
+  if (value && !choices.includes(value)) {
+    txCategorySelect.insertAdjacentHTML(
+      "beforeend",
+      `<option>${esc(value)}</option>`,
+    );
+  }
+  txCategorySelect.value = value || choices[0];
+  toggleOtherCategory();
+}
+function toggleOtherCategory() {
+  const other =
+    txCategorySelect.value === "Other Income" ||
+    txCategorySelect.value === "Other Expense";
+  otherCategoryField.classList.toggle("field-hidden", !other);
+  txOtherCategory.required = other;
+  if (!other) txOtherCategory.value = "";
+}
+txCategorySelect.onchange = toggleOtherCategory;
+function maximumTransactionDate() {
+  return phtDateValue(new Date(Date.now() + 86400000));
+}
+function openAdd(type) {
+  editingIndex = -1;
+  currentType = type;
+  modal.classList.remove("editing");
+  deleteTx.hidden = true;
+  downloadTx.hidden = true;
+  modalTitle.textContent = type === "income" ? "Add Income" : "Add Expense";
+  txTitle.value = "";
+  setTxCategories(type);
+  txAmount.value = "";
+  txDate.value = phtDateValue();
+  txMessage.classList.remove("show");
+  modal.classList.add("open");
+}
+function openEdit(i) {
+  editingIndex = i;
+  const t = allTx[i];
+  currentType = t.type;
+  modal.classList.add("editing");
+  deleteTx.hidden = false;
+  downloadTx.hidden = false;
+  modalTitle.textContent = "Edit Transaction";
+  txTitle.value = t.title;
+  setTxCategories(t.type, t.category);
+  if (t.category === "Other Income" || t.category === "Other Expense")
+    txOtherCategory.value = t.category;
+  txAmount.value =
+    settings.currency === "USD"
+      ? (Number(t.amount) / settings.phpPerUsd).toFixed(2)
+      : Number(t.amount).toFixed(2);
+  txDate.value = phtDateValue(new Date(Number(t.time)));
+  txMessage.classList.remove("show");
+  modal.classList.add("open");
+}
+addExpense.onclick = () => openAdd("expense");
+addIncome.onclick = () => openAdd("income");
+cancel.onclick = () => modal.classList.remove("open");
+category.onchange = render;
+range.onchange = render;
+searchTx.oninput = render;
+downloadAll.onclick = () => {
+  downloadRangeMessage.classList.remove("show");
+  downloadRangeModal.classList.add("open");
+  downloadRangeModal
+    .querySelector('input[name="downloadRange"]:checked')
+    ?.focus();
+};
+cancelDownloadRange.onclick = () => downloadRangeModal.classList.remove("open");
+downloadRangeModal.onclick = (event) => {
+  if (event.target === downloadRangeModal)
+    downloadRangeModal.classList.remove("open");
+};
+downloadRangeForm.onsubmit = (event) => {
+  event.preventDefault();
+  downloadRangeMessage.classList.remove("show");
+  const selected = downloadRangeForm.elements.downloadRange.value;
+  try {
+    if (!downloadHistory(selected)) {
+      downloadRangeMessage.textContent =
+        "No transactions found for this period.";
+      downloadRangeMessage.classList.add("show");
+      return;
+    }
+    downloadRangeModal.classList.remove("open");
+  } catch (error) {
+    console.error(error);
+    downloadRangeMessage.textContent = error.message;
+    downloadRangeMessage.classList.add("show");
+  }
+};
+downloadTx.onclick = () => {
+  if (editingIndex >= 0)
+    try {
+      downloadSingle(allTx[editingIndex]);
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+};
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    downloadRangeModal.classList.remove("open");
+    modal.classList.remove("open");
+  }
+});
+save.onclick = async () => {
+  const amount = Number(txAmount.value),
+    isOther = txCategorySelect.value.startsWith("Other "),
+    selectedCategory = isOther
+      ? txOtherCategory.value.trim()
+      : txCategorySelect.value;
+  if (!txTitle.value.trim() || !selectedCategory || !amount || !txDate.value)
+    return;
+  if (txDate.value > maximumTransactionDate()) {
+    txMessage.textContent =
+      "This date is not valid because that day has not arrived yet. You may only select up to one day ahead.";
+    txMessage.classList.add("show");
+    return;
+  }
+  const php =
+    settings.currency === "USD" ? amount * settings.phpPerUsd : amount;
+  const item = {
+    title: txTitle.value.trim(),
+    category: selectedCategory,
+    amount: php,
+    type: currentType,
+    time: phtTimestamp(txDate.value),
+  };
+  if (editingIndex >= 0) allTx[editingIndex] = item;
+  else allTx.push(item);
+  await saveTransactions(currentUser, allTx);
+  modal.classList.remove("open");
+  fillCategories();
+  render();
+};
+deleteTx.onclick = async () => {
+  if (editingIndex < 0) return;
+  const deleteIndex = editingIndex,
+    transaction = allTx[deleteIndex],
+    confirmed = await window.pisoTrackConfirm({
+      title: "Delete Transaction?",
+      message: `Are you sure you want to delete ${transaction.title || "this transaction"}? This action cannot be undone.`,
+      confirmText: "Delete",
+      danger: true,
+    });
+  if (!confirmed) return;
+  deleteTx.disabled = true;
+  try {
+    allTx.splice(deleteIndex, 1);
+    await saveTransactions(currentUser, allTx);
+    modal.classList.remove("open");
+    editingIndex = -1;
+    fillCategories();
+    render();
+  } catch (error) {
+    allTx.splice(deleteIndex, 0, transaction);
+    console.error(error);
+    txMessage.textContent =
+      "Could not delete the transaction. Please try again.";
+    txMessage.classList.add("show");
+  } finally {
+    deleteTx.disabled = false;
+  }
+};
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return (location.href = "login.html");
+  if (!user.emailVerified) {
+    await signOut(auth);
+    return (location.href = "login.html");
+  }
+  currentUser = user;
+  userName.textContent = user.displayName || user.email;
+  void loadHeaderProfile(user);
+  try {
+    settings = await getSettings(user);
+    localStorage.setItem("pisotrackDark", String(settings.dark));
+    applyDark(settings.dark);
+  } catch (error) {
+    console.error(error);
+    settings = {
+      currency: "PHP",
+      notifications: true,
+      dark: document.documentElement.classList.contains("dark"),
+      phpPerUsd: 56.5,
+    };
+  }
+  try {
+    allTx = await getTransactions(user);
+    fillCategories();
+    render();
+  } catch (error) {
+    console.error(error);
+    net.classList.remove("skeleton");
+    list.setAttribute("aria-busy", "false");
+    list.innerHTML = '<div class="empty">Unable to load transactions.</div>';
+  }
+});
