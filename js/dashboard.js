@@ -50,7 +50,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/fireba
         incomeElement.textContent = money(inc, settings.currency, settings.phpPerUsd);
         expenseElement.textContent = money(exp, settings.currency, settings.phpPerUsd);
         balanceElement.textContent = money(inc - exp, settings.currency, settings.phpPerUsd);
-        const recent = transactions.slice(-5).reverse();
+        const recent = transactions.slice(-3).reverse();
         listElement.innerHTML = recent.length ? recent.map(t => `<div class="transaction"><span>${esc(t.title || t.category || "Transaction")}</span><span>${t.type === "income" ? "+" : "-"}${money(t.amount, settings.currency, settings.phpPerUsd)}</span></div>`).join("") : '<div class="empty">No transactions yet.</div>';
         finishDashboardLoading();
       }

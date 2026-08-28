@@ -20,7 +20,7 @@
           <h1>PisoTrack</h1>
         </div>
         <a class="nav-item" href="index.html"
-          ><img src="homeicon.png" alt="" />Home</a
+          ><img src="homeicon.png" alt="" />Dashboard</a
         ><a class="nav-item" href="transactions.html"
           ><img src="purchaseicon.png" alt="" />Transactions</a
         ><a class="nav-item active" href="reports.html"
@@ -38,18 +38,16 @@
           >
         </div>
         <div class="report-controls">
-          <div class="period-navigation">
-            <div class="month-nav" aria-label="Month navigation"><button id="prevMonth" class="btn secondary" type="button" aria-label="Previous month">&lt;</button><div id="monthLabel" class="month-label skeleton skeleton-text" aria-label="Loading report month"></div><button id="nextMonth" class="btn secondary" type="button" aria-label="Next month">&gt;</button></div>
-            <div class="month-nav" aria-label="Year navigation"><button id="prevYear" class="btn secondary" type="button" aria-label="Previous year">&lt;</button><div id="yearLabel" class="month-label skeleton skeleton-text" aria-label="Loading report year"></div><button id="nextYear" class="btn secondary" type="button" aria-label="Next year">&gt;</button></div>
-            <select id="periodType" class="select" aria-label="Report period"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>
-          </div>
-          <div class="chart-controls"><select id="graphType" class="select">
-            <option value="expense">Total Expenses</option>
-            <option value="income">Total Income</option></select
-          ><select id="chartStyle" class="select">
-            <option value="donut">Donut Chart</option>
+          <div class="chart-controls"><select id="chartStyle" class="select" aria-label="Chart type">
+            <option value="donut">Donut Graph</option>
             <option value="bar">Bar Graph</option>
-          </select></div>
+          </select><select id="graphType" class="select" aria-label="Report type">
+            <option value="expense">Total Expenses</option>
+            <option value="income">Total Income</option></select></div>
+          <div class="period-navigation">
+            <select id="periodType" class="select" aria-label="Report period"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>
+            <div class="month-nav" aria-label="Selected report period"><button id="prev" class="btn secondary" type="button" aria-label="Previous period">&lt;</button><div id="monthLabel" class="month-label skeleton skeleton-text" aria-label="Loading report period"></div><button id="next" class="btn secondary" type="button" aria-label="Next period">&gt;</button></div>
+          </div>
         </div>
         <div class="report-grid" aria-busy="true">
           <section class="chart-card">
@@ -86,7 +84,6 @@
       </main>
     </div>
     <script src="logout.js?v=20260818-7" defer></script>
-    <script src="js/reports-controls.js"></script>
     <script type="module" src="js/reports.js"></script>
     <script src="js/sidebar-menu.js"></script>
   </body>

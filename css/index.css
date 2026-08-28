@@ -374,7 +374,7 @@
     overflow: hidden;
 }
 
-.dash-card:first-child {
+.dash-card:not(.small) {
     grid-column: 1 / -1;
 }
 
