@@ -38,16 +38,16 @@
           >
         </div>
         <div class="report-controls">
-          <div class="chart-controls"><select id="chartStyle" class="select" aria-label="Chart type">
-            <option value="donut">Donut Graph</option>
-            <option value="bar">Bar Graph</option>
-          </select><select id="graphType" class="select" aria-label="Report type">
-            <option value="expense">Total Expenses</option>
-            <option value="income">Total Income</option></select></div>
           <div class="period-navigation">
             <select id="periodType" class="select" aria-label="Report period"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>
             <div class="month-nav" aria-label="Selected report period"><button id="prev" class="btn secondary" type="button" aria-label="Previous period">&lt;</button><div id="monthLabel" class="month-label skeleton skeleton-text" aria-label="Loading report period"></div><button id="next" class="btn secondary" type="button" aria-label="Next period">&gt;</button></div>
           </div>
+          <div class="chart-controls"><select id="chartStyle" class="select" aria-label="Chart type">
+            <option value="bar">Bar Graph</option>
+            <option value="donut">Donut Graph</option>
+          </select><select id="graphType" class="select" aria-label="Report type">
+            <option value="expense">Total Expenses</option>
+            <option value="income">Total Income</option></select></div>
         </div>
         <div class="report-grid" aria-busy="true">
           <section class="chart-card">
