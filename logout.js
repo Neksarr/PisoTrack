@@ -46,8 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
   mobileNav.className = "mobile-bottom-nav";
   mobileNav.setAttribute("aria-label", "Primary navigation");
   const mobilePages = [
-    ["index.html", "homeicon.png", "Dashboard"],
-    ["transactions.html", "purchaseicon.png", "Transactions"],
+    ["index.html", "homeicon.png", "Home"],
+    ["transactions.html", "purchaseicon.png", "Dashboard"],
     ["reports.html", "reporticon.png", "Reports"],
     ["settings.html", "settingicon.png", "Settings"]
   ];
