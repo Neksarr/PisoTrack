@@ -144,3 +144,140 @@
   .mobile-bottom-nav a { font-size: 10px; }
   .mobile-bottom-nav img { width: 23px; height: 23px; }
 }
+
+/* Renamed Dashboard ledger: mobile-only alignment. */
+@media (max-width: 768px) {
+  .dashboard-page .main { padding-inline: 14px !important; }
+  .dashboard-page .topbar {
+    min-height: 68px;
+    margin-inline: -14px !important;
+    margin-bottom: 16px !important;
+    padding-inline: 16px !important;
+  }
+  .dashboard-page .topbar > .user-box { display: flex; align-items: center; }
+  .dashboard-page .topbar .user-box img { width: 40px; height: 40px; }
+  .dashboard-page .topbar h2 { font-size: 22px !important; }
+
+  .dashboard-page .transactions-greeting {
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    margin: 0 0 16px;
+  }
+  .dashboard-page .transactions-greeting .profile-avatar {
+    width: 56px;
+    height: 56px;
+  }
+  .dashboard-page .transactions-greeting-copy { gap: 3px; }
+  .dashboard-page .transactions-greeting-copy strong {
+    font-size: 18px;
+    line-height: 1.25;
+  }
+  .dashboard-page .transactions-greeting-copy span {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .dashboard-page .filters {
+    grid-template-columns: 52px minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 10px !important;
+    width: 100%;
+    margin-bottom: 14px;
+  }
+  .dashboard-page .filters > * { min-width: 0; }
+  .dashboard-page .filters .icon-download {
+    grid-column: 1;
+    width: 52px;
+    height: 48px;
+    justify-self: stretch;
+  }
+  .dashboard-page .filters #category { grid-column: 2; }
+  .dashboard-page .filters #range { grid-column: 3; }
+  .dashboard-page .filters #searchTx {
+    grid-column: 1 / -1 !important;
+    width: 100%;
+  }
+  .dashboard-page .filters #net {
+    grid-column: 1 / -1 !important;
+    justify-self: stretch;
+    width: 100%;
+    min-width: 0;
+    min-height: 76px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: var(--accent-text);
+    font-size: 22px;
+    line-height: 1.15;
+  }
+  .dashboard-page .filters #net::before {
+    content: "Current Balance";
+    position: static;
+    inset: auto;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    box-shadow: none;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .dashboard-page .panel { padding: 14px !important; }
+  .dashboard-page .tx-history { padding: 8px; border-radius: 14px; }
+  .dashboard-page .tx-date-heading { margin: 16px 0 9px; font-size: 16px; }
+  .dashboard-page .tx-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px 10px !important;
+    padding: 13px 12px;
+    margin-bottom: 8px;
+  }
+  .dashboard-page .tx-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+  }
+  .dashboard-page .tx-amount {
+    grid-column: 2;
+    grid-row: 1;
+    white-space: nowrap;
+  }
+  .dashboard-page .tx-row .edit {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 70px;
+  }
+  .dashboard-page .actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+  .dashboard-page .actions .btn {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 11px 8px;
+    font-size: 13px;
+  }
+  .dashboard-page .actions #addIncome { grid-column: 1; grid-row: 1; }
+  .dashboard-page .actions #addExpense { grid-column: 2; grid-row: 1; }
+}
+
+@media (max-width: 340px) {
+  .dashboard-page .main { padding-inline: 12px !important; }
+  .dashboard-page .topbar { margin-inline: -12px !important; }
+  .dashboard-page .filters { grid-template-columns: 52px minmax(0, 1fr) !important; }
+  .dashboard-page .filters #category { grid-column: 2; }
+  .dashboard-page .filters #range { grid-column: 1 / -1; }
+  .dashboard-page .transactions-greeting .profile-avatar { width: 50px; height: 50px; }
+  .dashboard-page .transactions-greeting-copy strong { font-size: 17px; }
+  .dashboard-page .transactions-greeting-copy span { font-size: 12px; }
+}
