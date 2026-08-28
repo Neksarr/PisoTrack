@@ -211,9 +211,52 @@ function pdfApi() {
     );
   return api;
 }
-function createPdfDocument() {
+const PDF_FONT_FAMILY = "PisoTrackNoto",
+  PDF_FONT_FILES = [
+    {
+      file: "NotoSans-Regular.ttf",
+      url: "fonts/NotoSans-Regular.ttf?v=20260828-1",
+      style: "normal",
+    },
+    {
+      file: "NotoSans-Bold.ttf",
+      url: "fonts/NotoSans-Bold.ttf?v=20260828-1",
+      style: "bold",
+    },
+  ];
+let pdfFontDataPromise = null;
+function pdfFontBinaryString(buffer) {
+  const bytes = new Uint8Array(buffer),
+    chunkSize = 32768,
+    chunks = [];
+  for (let index = 0; index < bytes.length; index += chunkSize)
+    chunks.push(String.fromCharCode(...bytes.subarray(index, index + chunkSize)));
+  return chunks.join("");
+}
+function loadPdfFontData() {
+  if (!pdfFontDataPromise)
+    pdfFontDataPromise = Promise.all(
+      PDF_FONT_FILES.map(async (font) => {
+        const response = await fetch(font.url);
+        if (!response.ok)
+          throw new Error(`PDF font could not be loaded (${response.status}).`);
+        return { ...font, data: pdfFontBinaryString(await response.arrayBuffer()) };
+      }),
+    ).catch((error) => {
+      pdfFontDataPromise = null;
+      throw error;
+    });
+  return pdfFontDataPromise;
+}
+async function createPdfDocument() {
   const PDF = pdfApi(),
-    pdf = new PDF();
+    pdf = new PDF(),
+    fonts = await loadPdfFontData();
+  fonts.forEach((font) => {
+    pdf.addFileToVFS(font.file, font.data);
+    pdf.addFont(font.file, PDF_FONT_FAMILY, font.style);
+  });
+  pdf.setFont(PDF_FONT_FAMILY, "normal");
   pdf.setCharSpace(0);
   return pdf;
 }
@@ -227,22 +270,22 @@ function safeFilename(value) {
   );
 }
 function addPdfTransaction(pdf, t, y) {
-  pdf.setFont("helvetica", "bold");
+  pdf.setFont(PDF_FONT_FAMILY, "bold");
   pdf.text(`Title: ${String(t.title || "Transaction")}`, 15, y);
-  pdf.setFont("helvetica", "normal");
+  pdf.setFont(PDF_FONT_FAMILY, "normal");
   pdf.text(`Category: ${String(t.category || "Uncategorized")}`, 15, y + 7);
   pdf.text(`Amount: ${formatPdfTransactionAmount(t)}`, 15, y + 14);
   pdf.text(`Date Created: ${pdfDate(t.time)}`, 15, y + 21);
   pdf.text(`Type: ${t.type === "income" ? "Income" : "Expense"}`, 15, y + 28);
   return y + 38;
 }
-function downloadSingle(t) {
+async function downloadSingle(t) {
   requireCurrentPdfUser();
   if (!t || !allTx.includes(t))
     throw new Error(
       "This transaction is not available for the signed-in account.",
     );
-  const pdf = createPdfDocument();
+  const pdf = await createPdfDocument();
   pdf.setFontSize(17);
   pdf.text(String(t.title || "Transaction"), 15, 18);
   pdf.setFontSize(11);
@@ -296,7 +339,7 @@ function exportRangeBounds(range) {
       throw new Error("Choose a valid export period.");
   }
 }
-function downloadHistory(range) {
+async function downloadHistory(range) {
   requireCurrentPdfUser();
   const [start, end] = exportRangeBounds(range),
     selected = allTx.filter(
@@ -304,7 +347,7 @@ function downloadHistory(range) {
     ),
     sorted = [...selected].sort((a, b) => Number(b.time) - Number(a.time));
   if (!sorted.length) return false;
-  const pdf = createPdfDocument();
+  const pdf = await createPdfDocument();
   let income = 0,
     expense = 0,
     allIncome = 0,
@@ -640,12 +683,12 @@ downloadRangeModal.onclick = (event) => {
   if (event.target === downloadRangeModal)
     downloadRangeModal.classList.remove("open");
 };
-downloadRangeForm.onsubmit = (event) => {
+downloadRangeForm.onsubmit = async (event) => {
   event.preventDefault();
   downloadRangeMessage.classList.remove("show");
   const selected = downloadRangeForm.elements.downloadRange.value;
   try {
-    if (!downloadHistory(selected)) {
+    if (!(await downloadHistory(selected))) {
       downloadRangeMessage.textContent =
         "No transactions found for this period.";
       downloadRangeMessage.classList.add("show");
@@ -658,10 +701,10 @@ downloadRangeForm.onsubmit = (event) => {
     downloadRangeMessage.classList.add("show");
   }
 };
-downloadTx.onclick = () => {
+downloadTx.onclick = async () => {
   if (editingIndex >= 0)
     try {
-      downloadSingle(allTx[editingIndex]);
+      await downloadSingle(allTx[editingIndex]);
     } catch (error) {
       console.error(error);
       alert(error.message);
