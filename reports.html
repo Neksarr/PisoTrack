@@ -38,22 +38,23 @@
           >
         </div>
         <div class="report-controls">
-          <select id="periodType" class="select" aria-label="Expense period"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>
-          <button id="prev" class="btn secondary">&lt;</button>
-          <div id="monthLabel" class="month-label skeleton skeleton-text" aria-label="Loading report month"></div>
-          <button id="next" class="btn secondary">&gt;</button
-          ><select id="graphType" class="select">
+          <div class="period-navigation">
+            <div class="month-nav" aria-label="Month navigation"><button id="prevMonth" class="btn secondary" type="button" aria-label="Previous month">&lt;</button><div id="monthLabel" class="month-label skeleton skeleton-text" aria-label="Loading report month"></div><button id="nextMonth" class="btn secondary" type="button" aria-label="Next month">&gt;</button></div>
+            <div class="month-nav" aria-label="Year navigation"><button id="prevYear" class="btn secondary" type="button" aria-label="Previous year">&lt;</button><div id="yearLabel" class="month-label skeleton skeleton-text" aria-label="Loading report year"></div><button id="nextYear" class="btn secondary" type="button" aria-label="Next year">&gt;</button></div>
+            <select id="periodType" class="select" aria-label="Report period"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>
+          </div>
+          <div class="chart-controls"><select id="graphType" class="select">
             <option value="expense">Total Expenses</option>
             <option value="income">Total Income</option></select
           ><select id="chartStyle" class="select">
             <option value="donut">Donut Chart</option>
             <option value="bar">Bar Graph</option>
-          </select>
+          </select></div>
         </div>
         <div class="report-grid" aria-busy="true">
           <section class="chart-card">
             <h3 id="chartTitle">Total Expenses</h3>
-            <div class="donut-wrap">
+            <div id="donutWrap" class="donut-wrap">
               <div id="donut" class="donut skeleton skeleton-chart" aria-hidden="true">
                 <div id="centerText" class="center-text"></div>
               </div>
@@ -63,6 +64,7 @@
               </div>
             </div>
             <div id="legend" class="legend skeleton skeleton-legend" aria-hidden="true"></div>
+            <div id="reportEmptyState" class="report-empty-state" hidden><p>No data to show yet.</p><button id="reportEmptyAction" class="btn" type="button">+ Add Expense</button></div>
           </section>
           <section class="panel">
             <h3>Spending Overview</h3>
@@ -89,4 +91,3 @@
     <script src="js/sidebar-menu.js"></script>
   </body>
 </html>
-F

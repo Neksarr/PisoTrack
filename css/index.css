@@ -349,7 +349,7 @@
     max-width: 760px;
     margin-inline: auto;
 }
-.dashboard-greeting{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:14px;font-size:22px}.dashboard-greeting .profile-avatar{width:64px;height:64px}
+.dashboard-greeting{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:14px;min-width:0}.dashboard-greeting .profile-avatar{width:64px;height:64px;flex:0 0 auto}.dashboard-greeting-copy{display:flex;flex-direction:column;gap:5px;min-width:0}.dashboard-greeting-copy strong{font-size:22px;overflow-wrap:anywhere}.dashboard-greeting-copy span{color:var(--muted);font-size:15px}@media(max-width:420px){.dashboard-greeting{justify-content:flex-start}.dashboard-greeting .profile-avatar{width:56px;height:56px}.dashboard-greeting-copy strong{font-size:18px}.dashboard-greeting-copy span{font-size:13px}}
 
 .dash-card {
     color: white;

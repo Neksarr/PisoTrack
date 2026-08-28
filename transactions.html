@@ -92,10 +92,24 @@
           >
             <img src="trash.png" alt="" /></button
           ><button id="downloadTx" class="icon-download" type="button" aria-label="Download transaction PDF" title="Download transaction PDF" hidden><img src="download.png" alt=""></button
-          ><button class="btn secondary" id="cancel">Cancel</button
-          ><button class="btn" id="save">Save</button>
+          ><button class="btn secondary modal-hover-button" id="cancel">Cancel</button
+          ><button class="btn modal-hover-button" id="save">Save</button>
         </div>
       </div>
+    </div>
+    <div class="modal" id="downloadRangeModal" role="dialog" aria-modal="true" aria-labelledby="downloadRangeTitle">
+      <form class="modal-box" id="downloadRangeForm">
+        <h3 id="downloadRangeTitle">Download Transactions</h3>
+        <p class="download-range-help">Choose the transaction period to include.</p>
+        <div id="downloadRangeMessage" class="message error" role="alert"></div>
+        <fieldset class="download-range-options">
+          <label><input type="radio" name="downloadRange" value="lastYear" checked><span>Last Year</span></label>
+          <label><input type="radio" name="downloadRange" value="last6Months"><span>Last 6 Months</span></label>
+          <label><input type="radio" name="downloadRange" value="last3Months"><span>Last 3 Months</span></label>
+          <label><input type="radio" name="downloadRange" value="lastMonth"><span>Last Month</span></label>
+        </fieldset>
+        <div class="modal-actions"><button id="cancelDownloadRange" class="btn secondary modal-hover-button" type="button">Cancel</button><button id="confirmDownloadRange" class="btn modal-hover-button" type="submit">Download</button></div>
+      </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="logout.js?v=20260818-7" defer></script>
