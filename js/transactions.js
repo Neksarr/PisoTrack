@@ -136,6 +136,7 @@ async function loadHeaderProfile(user) {
       profile = snapshot.exists() ? snapshot.data() : {},
       photo = profile.photoDataUrl || "profileicon.png",
       name = profile.name || user.displayName || "User";
+    if (auth.currentUser?.uid !== user.uid) return;
     [topProfileImage, transactionProfileImage].forEach((image) => {
       image.src = photo;
       image.onerror = () => {
@@ -144,6 +145,7 @@ async function loadHeaderProfile(user) {
     });
     transactionGreeting.textContent = `Hello, ${name}`;
   } catch (error) {
+    if (auth.currentUser?.uid !== user.uid) return;
     console.error(error);
     topProfileImage.src = "profileicon.png";
     transactionProfileImage.src = "profileicon.png";
@@ -176,10 +178,11 @@ function pdfNumericAmount(value) {
   return Number.isFinite(amount) ? amount : 0;
 }
 function pdfCurrencyAmount(value) {
+  const userSettings = getCurrentUserPdfSettings();
   return money(
     Math.abs(pdfNumericAmount(value)),
-    settings.currency,
-    settings.phpPerUsd,
+    userSettings.currency,
+    userSettings.phpPerUsd,
   );
 }
 function formatPdfIncome(value) {
@@ -225,6 +228,11 @@ function addPdfTransaction(pdf, t, y) {
   return y + 38;
 }
 function downloadSingle(t) {
+  requireCurrentPdfUser();
+  if (!t || !allTx.includes(t))
+    throw new Error(
+      "This transaction is not available for the signed-in account.",
+    );
   const PDF = pdfApi(),
     pdf = new PDF();
   pdf.setFontSize(17);
@@ -281,6 +289,7 @@ function exportRangeBounds(range) {
   }
 }
 function downloadHistory(range) {
+  requireCurrentPdfUser();
   const [start, end] = exportRangeBounds(range),
     selected = allTx.filter(
       (t) => Number(t.time) >= start && Number(t.time) < end,
@@ -325,11 +334,63 @@ function downloadHistory(range) {
   return true;
 }
 
-let currentUser,
+let currentUser = null,
   allTx = [],
-  settings,
+  settings = defaultUserSettings(),
+  loadedUserUid = null,
+  userSettingsReady = false,
+  pdfExportReady = false,
   editingIndex = -1,
   currentType = "expense";
+function defaultUserSettings() {
+  return {
+    currency: "PHP",
+    notifications: true,
+    dark: document.documentElement.classList.contains("dark"),
+    phpPerUsd: 56.5,
+  };
+}
+function requireCurrentPdfUser() {
+  const user = auth.currentUser;
+  if (!user || !currentUser || user.uid !== currentUser.uid)
+    throw new Error("Please sign in before exporting transactions.");
+  if (loadedUserUid !== user.uid || !pdfExportReady)
+    throw new Error(
+      "Your transactions and currency preference are still loading. Please try again.",
+    );
+  return user;
+}
+function getCurrentUserPdfSettings() {
+  requireCurrentPdfUser();
+  return {
+    currency: settings?.currency === "USD" ? "USD" : "PHP",
+    phpPerUsd:
+      Number.isFinite(Number(settings?.phpPerUsd)) &&
+      Number(settings.phpPerUsd) > 0
+        ? Number(settings.phpPerUsd)
+        : 56.5,
+  };
+}
+function clearUserSessionState() {
+  currentUser = null;
+  loadedUserUid = null;
+  userSettingsReady = false;
+  pdfExportReady = false;
+  allTx = [];
+  settings = defaultUserSettings();
+  editingIndex = -1;
+  modal.classList.remove("open", "editing");
+  downloadRangeModal.classList.remove("open");
+  category.innerHTML = "<option>All</option>";
+  net.textContent = money(0, settings.currency, settings.phpPerUsd);
+  net.classList.remove("skeleton");
+  list.setAttribute("aria-busy", "true");
+  list.innerHTML = '<div class="empty">Loading transactions...</div>';
+  userName.textContent = "User";
+  transactionGreeting.textContent = "Hello, User";
+  topProfileImage.src = "profileicon.png";
+  transactionProfileImage.src = "profileicon.png";
+}
 range.innerHTML =
   "<option>All</option><option>Today</option><option>Last Week</option><option>This Week</option><option>This Month</option><option>Last Month</option><option>Last 3 Months</option><option>This Year</option>";
 range.value = "All";
@@ -665,32 +726,43 @@ deleteTx.onclick = async () => {
   }
 };
 onAuthStateChanged(auth, async (user) => {
+  clearUserSessionState();
   if (!user) return (location.href = "login.html");
   if (!user.emailVerified) {
     await signOut(auth);
     return (location.href = "login.html");
   }
+  const authUid = user.uid;
   currentUser = user;
   userName.textContent = user.displayName || user.email;
   void loadHeaderProfile(user);
   try {
-    settings = await getSettings(user);
+    const userSettings = await getSettings(user);
+    if (auth.currentUser?.uid !== authUid || currentUser?.uid !== authUid)
+      return;
+    settings = userSettings;
+    userSettingsReady = true;
     localStorage.setItem("pisotrackDark", String(settings.dark));
     applyDark(settings.dark);
   } catch (error) {
+    if (auth.currentUser?.uid !== authUid || currentUser?.uid !== authUid)
+      return;
     console.error(error);
-    settings = {
-      currency: "PHP",
-      notifications: true,
-      dark: document.documentElement.classList.contains("dark"),
-      phpPerUsd: 56.5,
-    };
+    settings = defaultUserSettings();
+    userSettingsReady = false;
   }
   try {
-    allTx = await getTransactions(user);
+    const userTransactions = await getTransactions(user);
+    if (auth.currentUser?.uid !== authUid || currentUser?.uid !== authUid)
+      return;
+    allTx = userTransactions;
+    loadedUserUid = authUid;
+    pdfExportReady = userSettingsReady;
     fillCategories();
     render();
   } catch (error) {
+    if (auth.currentUser?.uid !== authUid || currentUser?.uid !== authUid)
+      return;
     console.error(error);
     net.classList.remove("skeleton");
     list.setAttribute("aria-busy", "false");
