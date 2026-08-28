@@ -177,23 +177,26 @@ function pdfNumericAmount(value) {
   );
   return Number.isFinite(amount) ? amount : 0;
 }
-function pdfCurrencyAmount(value) {
+function normalizePdfMoneyValue(value) {
+  return Math.abs(pdfNumericAmount(value));
+}
+function formatPdfUnsignedCurrency(value) {
   const userSettings = getCurrentUserPdfSettings();
   return money(
-    Math.abs(pdfNumericAmount(value)),
+    normalizePdfMoneyValue(value),
     userSettings.currency,
     userSettings.phpPerUsd,
   );
 }
 function formatPdfIncome(value) {
-  return `+${pdfCurrencyAmount(value)}`;
+  return `+${formatPdfUnsignedCurrency(value)}`;
 }
 function formatPdfExpense(value) {
-  return `-${pdfCurrencyAmount(value)}`;
+  return `-${formatPdfUnsignedCurrency(value)}`;
 }
 function formatPdfBudget(value) {
   const amount = pdfNumericAmount(value);
-  return `${amount < 0 ? "-" : ""}${pdfCurrencyAmount(amount)}`;
+  return `${amount < 0 ? "-" : ""}${formatPdfUnsignedCurrency(amount)}`;
 }
 function formatPdfTransactionAmount(transaction) {
   return String(transaction?.type || "").toLowerCase() === "income"
@@ -207,6 +210,12 @@ function pdfApi() {
       "PDF library is unavailable. Check your connection and try again.",
     );
   return api;
+}
+function createPdfDocument() {
+  const PDF = pdfApi(),
+    pdf = new PDF();
+  pdf.setCharSpace(0);
+  return pdf;
 }
 function safeFilename(value) {
   return (
@@ -233,8 +242,7 @@ function downloadSingle(t) {
     throw new Error(
       "This transaction is not available for the signed-in account.",
     );
-  const PDF = pdfApi(),
-    pdf = new PDF();
+  const pdf = createPdfDocument();
   pdf.setFontSize(17);
   pdf.text(String(t.title || "Transaction"), 15, 18);
   pdf.setFontSize(11);
@@ -296,8 +304,7 @@ function downloadHistory(range) {
     ),
     sorted = [...selected].sort((a, b) => Number(b.time) - Number(a.time));
   if (!sorted.length) return false;
-  const PDF = pdfApi(),
-    pdf = new PDF();
+  const pdf = createPdfDocument();
   let income = 0,
     expense = 0,
     allIncome = 0,
