@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   mobileNav.setAttribute("aria-label", "Primary navigation");
   const mobilePages = [
     ["index.html", "homeicon.png", "Home"],
-    ["transactions.html", "purchaseicon.png", "Dashboard"],
+    ["dashboard.html", "purchaseicon.png", "Dashboard"],
     ["reports.html", "reporticon.png", "Reports"],
     ["settings.html", "settingicon.png", "Settings"]
   ];

@@ -3,7 +3,7 @@ PisoTrack Desktop
 Included pages:
 login.html
 index.html
-transactions.html
+dashboard.html
 reports.html
 settings.html
 auth-action.html
