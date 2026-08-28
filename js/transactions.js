@@ -257,10 +257,20 @@ function exportRangeBounds(range) {
         Date.UTC(year - 1, 0, 1) - phtOffset,
         Date.UTC(year, 0, 1) - phtOffset,
       ];
+    case "thisYear":
+      return [
+        Date.UTC(year, 0, 1) - phtOffset,
+        Date.UTC(year + 1, 0, 1) - phtOffset,
+      ];
     case "last6Months":
       return [shiftCalendarMonths(year, month - 1, day, -6), tomorrow];
     case "last3Months":
       return [shiftCalendarMonths(year, month - 1, day, -3), tomorrow];
+    case "thisMonth":
+      return [
+        Date.UTC(year, month - 1, 1) - phtOffset,
+        Date.UTC(year, month, 1) - phtOffset,
+      ];
     case "lastMonth":
       return [
         Date.UTC(year, month - 2, 1) - phtOffset,
