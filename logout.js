@@ -53,27 +53,13 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
   mobileNav.innerHTML = mobilePages.map(([href, icon, label]) => `<a href="${href}" class="${currentPage === href ? "active" : ""}"><img src="${icon}" alt=""><span>${label}</span></a>`).join("");
   document.body.appendChild(mobileNav);
-  const userLink = document.createElement("a");
-  userLink.className = "nav-item" + (currentPage === "users.html" ? " active" : "");
-  userLink.href = "users.html";
-  userLink.innerHTML = '<img src="profileicon.png" alt=""><span>User</span>';
-  sidebar.insertBefore(userLink, footer);
-
-  if (currentPage !== "users.html") {
+  if (currentPage !== "settings.html") {
     const profileLink = document.querySelector(".user-box");
     const profileText = profileLink?.querySelector("span");
     if (profileText) profileText.hidden = true;
     if (profileLink) {
       profileLink.setAttribute("aria-label", "Open user profile");
       profileLink.title = "User profile";
-    }
-  } else {
-    const topbar = document.querySelector(".topbar");
-    const backHome = topbar?.querySelector(".user-box");
-    if (topbar && backHome) {
-      backHome.style.marginLeft = "0";
-      backHome.style.marginRight = "auto";
-      topbar.prepend(backHome);
     }
   }
 

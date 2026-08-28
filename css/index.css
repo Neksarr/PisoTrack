@@ -349,6 +349,7 @@
     max-width: 760px;
     margin-inline: auto;
 }
+.dashboard-greeting{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:14px;font-size:22px}.dashboard-greeting .profile-avatar{width:64px;height:64px}
 
 .dash-card {
     color: white;

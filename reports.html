@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/reports.css" />
     <link rel="stylesheet" href="mobile.css?v=20260818-5" />
     <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/theme.css" />
   </head>
   <body>
     <div class="layout">
@@ -32,11 +33,12 @@
       <main class="main">
         <div class="topbar">
           <h2>Reports</h2>
-          <a class="user-box" href="users.html"
-            ><img src="profileicon.png" /><span id="userName">User</span></a
+          <a class="user-box" href="settings.html"
+            ><img id="topProfileImage" class="profile-avatar" src="profileicon.png" /><span id="userName">User</span></a
           >
         </div>
         <div class="report-controls">
+          <select id="periodType" class="select" aria-label="Expense period"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>
           <button id="prev" class="btn secondary">&lt;</button>
           <div id="monthLabel" class="month-label skeleton skeleton-text" aria-label="Loading report month"></div>
           <button id="next" class="btn secondary">&gt;</button

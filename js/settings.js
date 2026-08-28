@@ -1,182 +1,22 @@
-
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-      import {
-        getAuth,
-        onAuthStateChanged,
-        signOut,
-      } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-      import {
-        getFirestore,
-        doc,
-        getDoc,
-        setDoc,
-      } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-      const firebaseConfig = {
-        apiKey: "AIzaSyBv2m_ciaohvHg7xCqkSWeTM_TfiphzMqw",
-        authDomain: "pisotrack-e61d6.firebaseapp.com",
-        projectId: "pisotrack-e61d6",
-        storageBucket: "pisotrack-e61d6.firebasestorage.app",
-        messagingSenderId: "492013865042",
-        appId: "1:492013865042:web:e0ccf6e2bee76aab32f78b",
-      };
-
-      const app = initializeApp(firebaseConfig),
-        auth = getAuth(app),
-        db = getFirestore(app);
-      function safeEmailKey(email) {
-        return String(email || "guest")
-          .replaceAll("@", "_at_")
-          .replaceAll(".", "_dot_")
-          .replaceAll("+", "_plus_");
-      }
-      function transactionKey(email) {
-        return "transactions_" + safeEmailKey(email);
-      }
-      function normalizeTransactions(raw) {
-        if (Array.isArray(raw)) return raw;
-        if (typeof raw === "string") {
-          try {
-            const p = JSON.parse(raw);
-            return Array.isArray(p) ? p : [];
-          } catch (e) {
-            return [];
-          }
-        }
-        return [];
-      }
-      function money(v, currency = "PHP", rate = 56.5) {
-        if (currency === "USD")
-          return (
-            "$" +
-            (Number(v || 0) / rate).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })
-          );
-        return (
-          "₱" +
-          Number(v || 0).toLocaleString("en-PH", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
-          })
-        );
-      }
-      async function getAppData(user) {
-        const ref = doc(db, "users", user.uid, "appData", "default"),
-          snap = await getDoc(ref);
-        return { ref, data: snap.exists() ? snap.data() : {} };
-      }
-      async function getTransactions(user) {
-        const { data } = await getAppData(user);
-        return normalizeTransactions(
-          data[transactionKey(user.email)] ?? data.transactions,
-        );
-      }
-      async function saveTransactions(user, list) {
-        const ref = doc(db, "users", user.uid, "appData", "default");
-        await setDoc(
-          ref,
-          {
-            currentEmail: user.email,
-            email: user.email,
-            [transactionKey(user.email)]: JSON.stringify(list),
-            updatedAt: Date.now(),
-          },
-          { merge: true },
-        );
-      }
-      async function getSettings(user) {
-        const { data } = await getAppData(user);
-        return {
-          currency: data.currency || "PHP",
-          dark: data.dark === true,
-          phpPerUsd:
-            typeof data.phpPerUsdNumber === "number"
-              ? data.phpPerUsdNumber
-              : 56.5,
-        };
-      }
-      async function saveSettings(user, values) {
-        const ref = doc(db, "users", user.uid, "appData", "default");
-        await setDoc(
-          ref,
-          {
-            ...values,
-            currentEmail: user.email,
-            email: user.email,
-            updatedAt: Date.now(),
-          },
-          { merge: true },
-        );
-      }
-      function applyDark(v) {
-        document.documentElement.classList.toggle("dark", !!v);
-        if (document.body) document.body.classList.toggle("dark", !!v);
-      }
-      function fmtDate(ms) {
-        return new Date(Number(ms)).toLocaleDateString("en-US", {
-          month: "short",
-          day: "2-digit",
-          year: "numeric",
-        });
-      }
-      function esc(s) {
-        return String(s ?? "").replace(
-          /[&<>"']/g,
-          (c) =>
-            ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#39;",
-            })[c],
-        );
-      }
-
-      let user, s;
-      function paint() {
-        currency.value = s.currency;
-        currency.classList.remove("skeleton", "skeleton-control");
-        darkMode.classList.toggle("on", s.dark);
-        darkMode.classList.remove("skeleton");
-        applyDark(s.dark);
-      }
-      currency.onchange = async () => {
-        s.currency = currency.value;
-        await saveSettings(user, { currency: s.currency });
-      };
-      darkMode.onclick = async () => {
-        s.dark = !s.dark;
-        localStorage.setItem("pisotrackDark", String(s.dark));
-        paint();
-        await saveSettings(user, { dark: s.dark });
-      };
-      about.onclick = () => aboutModal.classList.add("open");
-      closeAbout.onclick = () => aboutModal.classList.remove("open");
-      logout.onclick = async () => {
-        if (!await window.pisoTrackConfirm({ title: "Log Out?", message: "Are you sure you want to log out?", confirmText: "Log Out" })) return;
-        await signOut(auth);
-        location.href = "login.html";
-      };
-      onAuthStateChanged(auth, async (u) => {
-        if (!u) return (location.href = "login.html");
-        if (!u.emailVerified) {
-          await signOut(auth);
-          return (location.href = "login.html");
-        }
-        user = u;
-        userName.textContent = u.displayName || u.email;
-        try {
-          s = await getSettings(u);
-          localStorage.setItem("pisotrackDark", String(s.dark));
-          applyDark(s.dark);
-        } catch (error) {
-          console.error(error);
-          s = { currency: "PHP", notifications: true, dark: document.documentElement.classList.contains("dark"), phpPerUsd: 56.5 };
-        }
-        paint();
-        syncStatus.textContent = "Data saves automatically";
-        syncStatus.classList.remove("skeleton", "skeleton-text");
-        document.querySelector(".settings-list")?.setAttribute("aria-busy", "false");
-      });
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import {getAuth,onAuthStateChanged,signOut,updateProfile,updatePassword,verifyBeforeUpdateEmail,EmailAuthProvider,reauthenticateWithCredential,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyBv2m_ciaohvHg7xCqkSWeTM_TfiphzMqw",authDomain:"pisotrack-e61d6.firebaseapp.com",projectId:"pisotrack-e61d6",storageBucket:"pisotrack-e61d6.firebasestorage.app",messagingSenderId:"492013865042",appId:"1:492013865042:web:e0ccf6e2bee76aab32f78b"}),auth=getAuth(app),db=getFirestore(app);
+const $=id=>document.getElementById(id),safeEmail=e=>String(e||"guest").replaceAll("@","_at_").replaceAll(".","_dot_").replaceAll("+","_plus_"),txKey=e=>"transactions_"+safeEmail(e);
+let user,settings={},profile={};
+const appRef=()=>doc(db,"users",user.uid,"appData","default"),userRef=()=>doc(db,"users",user.uid);
+function message(text,type="success"){const el=$("editMessage");el.textContent=text;el.className=`message show ${type}`}
+function applyPhoto(url){$("settingsProfileImage").src=url||"profileicon.png";$("settingsProfileImage").onerror=()=>{$("settingsProfileImage").src="profileicon.png"}}
+async function load(){const [a,p]=await Promise.all([getDoc(appRef()),getDoc(userRef())]);settings=a.exists()?a.data():{};profile=p.exists()?p.data():{};$("currency").value=settings.currency||"PHP";$("currency").classList.remove("skeleton","skeleton-control");$("darkMode").classList.toggle("on",settings.dark===true);$("darkMode").classList.remove("skeleton");$("colorTheme").value=localStorage.getItem("pisotrack_theme")||"blue";$("settingsProfileName").textContent=profile.name||user.displayName||"User";applyPhoto(profile.photoDataUrl);$("syncStatus").textContent="Data saves automatically";$("syncStatus").classList.remove("skeleton","skeleton-text");document.querySelector(".settings-list").setAttribute("aria-busy","false")}
+async function saveSettings(values){await setDoc(appRef(),{...values,currentEmail:user.email,email:user.email,updatedAt:Date.now()},{merge:true})}
+function resizeImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const image=new Image();image.onerror=reject;image.onload=()=>{const size=320,canvas=document.createElement("canvas");canvas.width=canvas.height=size;const ctx=canvas.getContext("2d"),side=Math.min(image.width,image.height),sx=(image.width-side)/2,sy=(image.height-side)/2;ctx.drawImage(image,sx,sy,side,side,0,0,size,size);resolve(canvas.toDataURL("image/jpeg",.78))};image.src=reader.result};reader.readAsDataURL(file)})}
+async function uploadPhoto(file){if(!file||!file.type.startsWith("image/"))return;const data=await resizeImage(file);applyPhoto(data);await setDoc(userRef(),{photoDataUrl:data,updatedAt:Date.now()},{merge:true});profile.photoDataUrl=data}
+$("profilePhotoButton").onclick=()=>$("profilePhotoInput").click();$("profilePhotoInput").onchange=async e=>{try{await uploadPhoto(e.target.files[0])}catch(error){console.error(error);alert("Could not save that profile picture.")}};
+$("currency").onchange=()=>saveSettings({currency:$("currency").value});$("darkMode").onclick=async()=>{settings.dark=!settings.dark;localStorage.setItem("pisotrackDark",String(settings.dark));document.documentElement.classList.toggle("dark",settings.dark);document.body.classList.toggle("dark",settings.dark);$("darkMode").classList.toggle("on",settings.dark);await saveSettings({dark:settings.dark})};
+$("colorTheme").onchange=()=>window.PisoTrackTheme.apply($("colorTheme").value);
+$("editInformation").onclick=()=>{$("editName").value=profile.name||user.displayName||"";$("editEmail").value=user.email||"";$("currentPassword").value=$("newPassword").value="";$("editMessage").className="message";$("editModal").classList.add("open")};$("cancelEdit").onclick=()=>$("editModal").classList.remove("open");
+$("editForm").onsubmit=async e=>{e.preventDefault();const name=$("editName").value.trim(),email=$("editEmail").value.trim(),current=$("currentPassword").value,next=$("newPassword").value,emailChanged=email!==user.email,passwordChanged=!!next;$("saveEdit").disabled=true;try{if(passwordChanged&&next.length<8)throw Error("New password must be at least 8 characters.");if(emailChanged||passwordChanged){if(!current)throw Error("Enter your current password for email or password changes.");await reauthenticateWithCredential(user,EmailAuthProvider.credential(user.email,current))}if(name!==user.displayName)await updateProfile(user,{displayName:name});if(passwordChanged)await updatePassword(user,next);if(emailChanged)await verifyBeforeUpdateEmail(user,email,{url:new URL("login.html",location.href).href});await setDoc(userRef(),{uid:user.uid,name,email:user.email,photoDataUrl:profile.photoDataUrl||null},{merge:true});profile.name=name;$("settingsProfileName").textContent=name;if(emailChanged)message("Verification sent to the new email. It changes after verification.");else $("editModal").classList.remove("open")}catch(error){console.error(error);message(error.message||"Unable to update your information.","error")}finally{$("saveEdit").disabled=false}};
+$("forgotPassword").onclick=async()=>{const button=$("forgotPassword");button.disabled=true;try{await sendPasswordResetEmail(auth,user.email,{url:new URL("login.html",location.href).href});alert("Password reset email sent.")}catch(error){console.error(error);alert(navigator.onLine?"Could not send the reset email. Please try again.":"You are offline. Connect to the internet and try again.")}finally{button.disabled=false}};
+$("clearTransactions").onclick=async()=>{if(!await window.pisoTrackConfirm({title:"Clear My Transactions?",message:"This permanently removes all saved transactions but keeps your account.",confirmText:"Clear",danger:true}))return;const snap=await getDoc(appRef()),data=snap.exists()?snap.data():{};await setDoc(appRef(),{[txKey(user.email)]:"[]",...(data.currentEmail&&data.currentEmail!==user.email?{[txKey(data.currentEmail)]:"[]"}:{}),transactions:"[]",updatedAt:Date.now()},{merge:true});alert("All transactions were cleared.")};
+$("about").onclick=()=>$("aboutModal").classList.add("open");$("closeAbout").onclick=()=>$("aboutModal").classList.remove("open");$("logout").onclick=async()=>{if(await window.pisoTrackConfirm({title:"Log Out?",message:"Are you sure you want to log out?",confirmText:"Log Out"})){await signOut(auth);location.href="login.html"}};
+onAuthStateChanged(auth,async u=>{if(!u)return location.href="login.html";if(!u.emailVerified){await signOut(auth);return location.href="login.html"}user=u;try{await load()}catch(error){console.error(error);settings={dark:document.documentElement.classList.contains("dark")};document.querySelector(".settings-list").setAttribute("aria-busy","false")}});

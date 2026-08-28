@@ -123,6 +123,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/fireba
         try {
           currentUser = user;
           userNameElement.textContent = user.displayName || user.email;
+          const profileSnap = await getDoc(doc(db, "users", user.uid));
+          const profile = profileSnap.exists() ? profileSnap.data() : {};
+          const displayName = profile.name || user.displayName || "User", photo = profile.photoDataUrl || "profileicon.png";
+          userNameElement.textContent = displayName;
+          document.getElementById("dashboardGreeting").textContent = `Hello, ${displayName}`;
+          [document.getElementById("topProfileImage"), document.getElementById("greetingProfileImage")].forEach(image => { image.src = photo; image.onerror = () => { image.src = "profileicon.png" } });
           settings = await getSettings(user);
           localStorage.setItem("pisotrackDark", String(settings.dark));
           applyDark(settings.dark);

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/transactions.css" />
     <link rel="stylesheet" href="mobile.css?v=20260818-5" />
     <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/theme.css" />
   </head>
   <body>
     <div class="layout">
@@ -32,11 +33,12 @@
       <main class="main">
         <div class="topbar">
           <h2>Transactions</h2>
-          <a class="user-box" href="users.html"
-            ><img src="profileicon.png" /><span id="userName">User</span></a
+          <a class="user-box" href="settings.html"
+            ><img id="topProfileImage" class="profile-avatar" src="profileicon.png" /><span id="userName">User</span></a
           >
         </div>
         <div class="filters">
+          <button id="downloadAll" class="icon-download" type="button" aria-label="Download complete transaction history" title="Download complete transaction history"><img src="download.png" alt=""></button>
           <select id="category" class="select">
             <option>All</option></select
           ><select id="range" class="select">
@@ -89,11 +91,13 @@
             hidden
           >
             <img src="trash.png" alt="" /></button
+          ><button id="downloadTx" class="icon-download" type="button" aria-label="Download transaction PDF" title="Download transaction PDF" hidden><img src="download.png" alt=""></button
           ><button class="btn secondary" id="cancel">Cancel</button
           ><button class="btn" id="save">Save</button>
         </div>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="logout.js?v=20260818-7" defer></script>
     <script type="module" src="js/transactions.js"></script>
     <script src="js/sidebar-menu.js"></script>

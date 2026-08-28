@@ -1,113 +1,16 @@
-<!doctype html>
-<html>
-  <head>
-    <script src="js/theme-init.js"></script>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>PisoTrack - Settings</title>
-    <link rel="icon" href="pisotrack.png" />
-    <!-- Styles extracted without changing cascade order. -->
-<link rel="stylesheet" href="css/settings.css">
-    <link rel="stylesheet" href="mobile.css?v=20260818-5">
-<link rel="stylesheet" href="css/global.css">
-  </head>
-  <body>
-    <div class="layout">
-      <aside class="sidebar">
-        <div class="brand">
-          <img src="pisotrack.png" alt="" />
-          <h1>PisoTrack</h1>
-        </div>
-        <a class="nav-item" href="index.html"
-          ><img src="homeicon.png" alt="" />Home</a
-        ><a class="nav-item" href="transactions.html"
-          ><img src="purchaseicon.png" alt="" />Transactions</a
-        ><a class="nav-item" href="reports.html"
-          ><img src="reporticon.png" alt="" />Reports</a
-        ><a class="nav-item active" href="settings.html"
-          ><img src="settingicon.png" alt="" />Settings</a
-        >
-        <div class="sidebar-bottom">PisoTrack Desktop</div>
-      </aside>
-      <main class="main">
-        <div class="topbar">
-          <h2>Settings</h2>
-          <a class="user-box" href="users.html"
-            ><img src="profileicon.png" /><span id="userName">User</span></a
-          >
-        </div>
-        <div class="settings-list" aria-busy="true">
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Currency</div>
-              <div class="setting-sub">Choose how amounts are displayed.</div>
-            </div>
-            <select id="currency" class="select skeleton skeleton-control" aria-label="Loading currency setting">
-              <option>PHP</option>
-              <option>USD</option>
-            </select>
-          </div>
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Cloud Sync</div>
-              <div class="setting-sub">
-                PisoTrack data saves automatically to Firebase.
-              </div>
-            </div>
-            <div id="syncStatus" class="skeleton skeleton-text" style="text-align: right; font-weight: bold" aria-label="Loading sync status">
-              Connected
-            </div>
-          </div>
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Dark Mode / White Mode</div>
-              <div class="setting-sub">Switch the website appearance.</div>
-            </div>
-            <div id="darkMode" class="switch skeleton" aria-label="Loading theme setting"></div>
-          </div>
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">About</div>
-              <div class="setting-sub">
-                PisoTrack: A Personal Expense Tracking and Budget Monitoring
-                System.
-              </div>
-            </div>
-            <button class="btn secondary" id="about">About</button>
-          </div>
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Logout</div>
-              <div class="setting-sub">Sign out of your PisoTrack account.</div>
-            </div>
-            <button class="btn danger" id="logout">Logout</button>
-          </div>
-        </div>
-      </main>
-    </div>
-    <div class="modal" id="aboutModal">
-      <div class="modal-box">
-        <h3>About PisoTrack</h3>
-        <p>
-          PisoTrack helps users record income and expenses, monitor their
-          balance, review transactions, and view monthly financial reports.<br>
-          <br>
-          Created by:<br>
-          Ayes, Princess Caroline A.<br>
-          Cabais, Matt R.<br>
-          Corpuz, Marl Skyler T.<br>
-          Gavina, Ariel G.<br>
-          Romaguera, Princess Athena D.<br>
-          Tolentino, Kalix Clark G.<br>
-          Villaflor, Aquisha Reese L.<br>
-        </p>
-        <div class="modal-actions">
-          <button class="btn" id="closeAbout">OK</button>
-        </div>
-      </div>
-    </div>
-    <script src="js/sidebar-menu.js"></script>
-    <script src="logout.js?v=20260818-7" defer></script>
-    <script type="module" src="js/settings.js"></script>
-  </body>
-</html>
+<!doctype html><html><head><script src="js/theme-init.js"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PisoTrack - Settings</title><link rel="icon" href="pisotrack.png"><link rel="stylesheet" href="css/settings.css"><link rel="stylesheet" href="mobile.css"><link rel="stylesheet" href="css/global.css"><link rel="stylesheet" href="css/theme.css"></head><body>
+<div class="layout"><aside class="sidebar"><div class="brand"><img src="pisotrack.png" alt=""><h1>PisoTrack</h1></div><a class="nav-item" href="index.html"><img src="homeicon.png" alt="">Home</a><a class="nav-item" href="transactions.html"><img src="purchaseicon.png" alt="">Transactions</a><a class="nav-item" href="reports.html"><img src="reporticon.png" alt="">Reports</a><a class="nav-item active" href="settings.html"><img src="settingicon.png" alt="">Settings</a><div class="sidebar-bottom">PisoTrack Website</div></aside>
+<main class="main"><div class="topbar"><h2>Settings</h2></div><div class="settings-list" aria-busy="true">
+<div class="settings-profile"><button id="profilePhotoButton" class="profile-photo-button" type="button" aria-label="Add or change profile picture"><img id="settingsProfileImage" class="profile-avatar" src="profileicon.png" alt="Profile picture"><span class="profile-photo-plus">+</span></button><input id="profilePhotoInput" type="file" accept="image/*" hidden><strong id="settingsProfileName">User</strong></div>
+<div class="setting-row"><div><div class="setting-title">Edit Information</div><div class="setting-sub">Edit your profile picture, username, email, and password.</div></div><button class="btn" id="editInformation">Edit</button></div>
+<div class="setting-row"><div><div class="setting-title">Forgot Password</div><div class="setting-sub">Send a password reset email to your account.</div></div><button class="btn secondary" id="forgotPassword">Send Email</button></div>
+<div class="setting-row"><div><div class="setting-title">Clear My Transactions</div><div class="setting-sub">Permanently remove all of your saved transactions.</div></div><button class="btn danger" id="clearTransactions">Clear</button></div>
+<div class="setting-row"><div><div class="setting-title">Currency</div><div class="setting-sub">Choose how amounts are displayed.</div></div><select id="currency" class="select skeleton skeleton-control"><option>PHP</option><option>USD</option></select></div>
+<div class="setting-row"><div><div class="setting-title">Cloud Sync</div><div class="setting-sub">PisoTrack data saves automatically to Firebase.</div></div><div id="syncStatus" class="skeleton skeleton-text">Connected</div></div>
+<div class="setting-row"><div><div class="setting-title">Dark Mode / White Mode</div><div class="setting-sub">Switch the website appearance.</div></div><button id="darkMode" class="switch skeleton" type="button" aria-label="Toggle dark mode"></button></div>
+<div class="setting-row"><div><div class="setting-title">Different Themes</div><div class="setting-sub">Choose your preferred PisoTrack color theme.</div></div><select id="colorTheme" class="select"><option value="blue">Blue</option><option value="pink">Pink</option><option value="purple">Purple</option><option value="red">Red</option><option value="green">Green</option><option value="yellow">Yellow</option></select></div>
+<div class="setting-row"><div><div class="setting-title">About</div><div class="setting-sub">PisoTrack: A Personal Expense Tracking and Budget Monitoring System.</div></div><button class="btn secondary" id="about">About</button></div>
+<div class="setting-row"><div><div class="setting-title">Logout</div><div class="setting-sub">Sign out of your PisoTrack account.</div></div><button class="btn danger" id="logout">Logout</button></div></div></main></div>
+<div class="modal" id="editModal"><form class="modal-box" id="editForm"><h3>Edit Information</h3><div id="editMessage" class="message"></div><label>Username</label><input id="editName" class="input" required><label>Email</label><input id="editEmail" class="input" type="email" required><label>Current Password</label><input id="currentPassword" class="input" type="password" placeholder="Required for email/password changes"><label>New Password</label><input id="newPassword" class="input" type="password" minlength="8" placeholder="Leave blank to keep current password"><div class="modal-actions"><button id="cancelEdit" class="btn secondary" type="button">Cancel</button><button id="saveEdit" class="btn" type="submit">Save Changes</button></div></form></div>
+<div class="modal" id="aboutModal"><div class="modal-box"><h3>About PisoTrack</h3><p>PisoTrack helps users record income and expenses, monitor their balance, and view financial reports.</p><div class="modal-actions"><button class="btn" id="closeAbout">OK</button></div></div></div>
+<script src="js/sidebar-menu.js"></script><script src="logout.js" defer></script><script type="module" src="js/settings.js"></script></body></html>

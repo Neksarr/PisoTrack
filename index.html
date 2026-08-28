@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/index.css">
 <link rel="stylesheet" href="mobile.css?v=20260818-5">
 <link rel="stylesheet" href="css/global.css">
+<link rel="stylesheet" href="css/theme.css">
 
 </head>
 
@@ -27,10 +28,11 @@
     </aside>
     <main class="main">
       <div class="topbar">
-        <h2>Budget Tracker</h2><a class="user-box" href="users.html"><img src="profileicon.png"><span
+        <h2>Dashboard</h2><a class="user-box" href="settings.html"><img id="topProfileImage" class="profile-avatar" src="profileicon.png"><span
             id="userName">User</span></a>
       </div>
       <section class="dashboard">
+        <div class="dashboard-greeting"><img id="greetingProfileImage" class="profile-avatar" src="profileicon.png" alt="Profile picture"><strong id="dashboardGreeting">Hello, User</strong></div>
         <div class="dash-card">
           <div class="card-label">Current Balance</div>
           <div id="balance" class="card-amount skeleton skeleton-amount" aria-label="Loading current balance">₱0</div>
@@ -50,7 +52,7 @@
       </section>
       <section class="panel" style="margin-top:24px">
         <div class="panel-head">
-          <h3>Spending Breakdown</h3><a class="btn secondary view-all-link" href="transactions.html">View All</a>
+          <h3>Transaction History</h3><a class="btn secondary view-all-link" href="transactions.html">View All</a>
         </div>
         <div id="list" aria-busy="true">
           <div class="skeleton skeleton-row" aria-hidden="true"></div><div class="skeleton skeleton-row" aria-hidden="true"></div><div class="skeleton skeleton-row" aria-hidden="true"></div>

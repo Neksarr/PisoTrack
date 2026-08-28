@@ -6,7 +6,6 @@ index.html
 transactions.html
 reports.html
 settings.html
-users.html
 auth-action.html
 
 This version uses the same Firebase project and the same Firestore appData/default document pattern as the uploaded Android app.
