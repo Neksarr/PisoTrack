@@ -671,6 +671,16 @@ cancel.onclick = () => modal.classList.remove("open");
 category.onchange = render;
 range.onchange = render;
 searchTx.oninput = render;
+const backToTop = document.getElementById("backToTop"),
+  backToTopThreshold = 400;
+function updateBackToTopVisibility() {
+  backToTop.classList.toggle("visible", window.scrollY >= backToTopThreshold);
+}
+window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
+backToTop.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+updateBackToTopVisibility();
 downloadAll.onclick = () => {
   downloadRangeMessage.classList.remove("show");
   downloadRangeModal.classList.add("open");

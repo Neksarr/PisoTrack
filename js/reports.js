@@ -1,68 +1,594 @@
-import {initializeApp} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";import {getAuth,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyBv2m_ciaohvHg7xCqkSWeTM_TfiphzMqw",
   authDomain: "pisotrack-e61d6.firebaseapp.com",
   projectId: "pisotrack-e61d6",
   storageBucket: "pisotrack-e61d6.firebasestorage.app",
   messagingSenderId: "492013865042",
-  appId: "1:492013865042:web:e0ccf6e2bee76aab32f78b"
+  appId: "1:492013865042:web:e0ccf6e2bee76aab32f78b",
 };
 
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-function safeEmailKey(email){return String(email||"guest").replaceAll("@","_at_").replaceAll(".","_dot_").replaceAll("+","_plus_")}
-function transactionKey(email){return "transactions_"+safeEmailKey(email)}
-function normalizeTransactions(raw){if(Array.isArray(raw))return raw;if(typeof raw==="string"){try{const p=JSON.parse(raw);return Array.isArray(p)?p:[]}catch(e){return []}}return []}
-function money(v,currency="PHP",rate=56.5){if(currency==="USD")return "$"+(Number(v||0)/rate).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});return "₱"+Number(v||0).toLocaleString("en-PH",{minimumFractionDigits:0,maximumFractionDigits:2})}
-async function getAppData(user){const ref=doc(db,"users",user.uid,"appData","default"),snap=await getDoc(ref);return {ref,data:snap.exists()?snap.data():{}}}
-async function getTransactions(user){const {data}=await getAppData(user);return normalizeTransactions(data[transactionKey(user.email)]??data[transactionKey(data.currentEmail)]??data.transactions)}
-async function saveTransactions(user,list){const ref=doc(db,"users",user.uid,"appData","default");await setDoc(ref,{currentEmail:user.email,email:user.email,[transactionKey(user.email)]:JSON.stringify(list),updatedAt:Date.now()},{merge:true})}
-async function getSettings(user){const {data}=await getAppData(user);return {currency:data.currency||"PHP",notifications:data.notifications!==false,dark:data.dark===true,phpPerUsd:typeof data.phpPerUsdNumber==="number"?data.phpPerUsdNumber:56.5}}
-async function saveSettings(user,values){const ref=doc(db,"users",user.uid,"appData","default");await setDoc(ref,{...values,currentEmail:user.email,email:user.email,updatedAt:Date.now()},{merge:true})}
-function applyDark(v){document.documentElement.classList.toggle("dark",!!v);if(document.body)document.body.classList.toggle("dark",!!v)}
-function fmtDate(ms){return new Date(Number(ms)).toLocaleDateString("en-US",{month:"short",day:"2-digit",year:"numeric"})}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-async function loadHeaderProfile(user){try{const snapshot=await getDoc(doc(db,"users",user.uid)),profile=snapshot.exists()?snapshot.data():{},photo=profile.photoDataUrl||"profileicon.png",name=profile.name||user.displayName||"User";[topProfileImage,reportsProfileImage].forEach(image=>{image.src=photo;image.onerror=()=>{image.src="profileicon.png"}});reportsGreeting.textContent=`Hello, ${name}`}catch(error){console.error(error);topProfileImage.src="profileicon.png";reportsProfileImage.src="profileicon.png";reportsGreeting.textContent=`Hello, ${user.displayName||"User"}`}}
-function phtDateValue(date=new Date()){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Manila",year:"numeric",month:"2-digit",day:"2-digit"}).format(date)}function phtTimestamp(value){return new Date(value+"T12:00:00+08:00").getTime()}
-
-let tx=[],settings,currentUser,month=new Date(phtDateValue()+"T00:00:00");month.setDate(1);const colors=["#56c774","#5b9bd5","#f4b183","#a785d6","#e56b6f","#6cc4c7","#d5b65a"];
-function inSelectedPeriod(ms){const[year,monthNumber]=phtDateValue(new Date(Number(ms))).split("-").map(Number);return periodType.value==="yearly"?year===month.getFullYear():year===month.getFullYear()&&monthNumber-1===month.getMonth()}
-function sameMonth(ms){return inSelectedPeriod(ms)}
-const savedChartStyle=localStorage.getItem("pisotrackChartStyle");if(savedChartStyle==="donut"||savedChartStyle==="bar")chartStyle.value=savedChartStyle;
-let selectedSlice=null,clearChartSelection=()=>{};
-function render(){monthLabel.textContent=month.toLocaleDateString("en-US",{month:"long",year:"numeric"});const m=tx.filter(t=>sameMonth(t.time));let income=0,expense=0;m.forEach(t=>t.type==="income"?income+=Number(t.amount):expense+=Number(t.amount));inc.textContent=money(income,settings.currency,settings.phpPerUsd);exp.textContent=money(expense,settings.currency,settings.phpPerUsd);bal.textContent=money(income-expense,settings.currency,settings.phpPerUsd);const type=graphType.value,groups={};m.filter(t=>t.type===type).forEach(t=>groups[t.category||"Other"]=(groups[t.category||"Other"]||0)+Number(t.amount));const entries=Object.entries(groups),total=entries.reduce((s,[,v])=>s+v,0);chartTitle.textContent=type==="income"?"Total Income":"Total Expenses";centerText.innerHTML=`<div><strong>${money(total,settings.currency,settings.phpPerUsd)}</strong><br>${type==="income"?"Total Income":"Total Expenses"}</div>`;if(!entries.length){donut.style.background="#56c774";legend.innerHTML="<span style='color:#56c774'>No "+(type==="income"?"Income":"Expenses")+"</span>";return}let deg=0,parts=[];legend.innerHTML="";entries.forEach(([name,v],i)=>{const start=deg;deg+=v/total*360;parts.push(`${colors[i%colors.length]} ${start}deg ${deg}deg`);legend.innerHTML+=`<span style="color:${colors[i%colors.length]}">${esc(name)} — ${money(v,settings.currency,settings.phpPerUsd)}</span>`});donut.style.background=`conic-gradient(${parts.join(",")})`}
-function polar(radius,angle){const radians=(angle-90)*Math.PI/180;return[145+radius*Math.cos(radians),145+radius*Math.sin(radians)]}
-function segmentPath(start,end){const outer=145,inner=83;if(end-start>=359.999)return`M145 0 A145 145 0 1 1 145 290 A145 145 0 1 1 145 0 L145 62 A83 83 0 1 0 145 228 A83 83 0 1 0 145 62 Z`;const a=polar(outer,start),b=polar(outer,end),c=polar(inner,end),d=polar(inner,start),large=end-start>180?1:0;return`M${a[0]} ${a[1]} A${outer} ${outer} 0 ${large} 1 ${b[0]} ${b[1]} L${c[0]} ${c[1]} A${inner} ${inner} 0 ${large} 0 ${d[0]} ${d[1]} Z`}
-function renderInteractive(){
-  monthLabel.classList.remove("skeleton","skeleton-text");donut.classList.remove("skeleton","skeleton-chart");donut.removeAttribute("aria-hidden");legend.classList.remove("skeleton","skeleton-legend");legend.removeAttribute("aria-hidden");[inc,exp,bal].forEach(element=>element.classList.remove("skeleton","skeleton-amount"));document.querySelector(".report-grid")?.setAttribute("aria-busy","false");
-  monthLabel.textContent=periodType.value==="yearly"?String(month.getFullYear()):month.toLocaleDateString("en-US",{month:"long",year:"numeric"});
-  const monthTransactions=tx.filter(t=>inSelectedPeriod(t.time));let income=0,expense=0;
-  monthTransactions.forEach(t=>t.type==="income"?income+=Number(t.amount):expense+=Number(t.amount));
-  let allIncome=0,allExpense=0;tx.forEach(t=>t.type==="income"?allIncome+=Number(t.amount):allExpense+=Number(t.amount));inc.textContent=money(income,settings.currency,settings.phpPerUsd);exp.textContent=money(expense,settings.currency,settings.phpPerUsd);bal.textContent=money(allIncome-allExpense,settings.currency,settings.phpPerUsd);
-  const type=graphType.value,groups={};monthTransactions.filter(t=>t.type===type&&Number.isFinite(Number(t.amount))&&Number(t.amount)>0).forEach(t=>groups[t.category||"Other"]=(groups[t.category||"Other"]||0)+Number(t.amount));
-  const entries=Object.entries(groups),total=entries.reduce((sum,[,value])=>sum+value,0),totalLabel=type==="income"?"Total Income":"Total Expenses",isBar=chartStyle.value==="bar";
-  chartTitle.textContent=totalLabel;selectedSlice=null;donut.classList.remove("has-selection");barChart.classList.remove("has-selection");donut.querySelector("svg")?.remove();barColumns.innerHTML="";donut.hidden=isBar;barChart.hidden=!isBar;
-  const showCenter=index=>{const content=index===null?`<div><strong>${money(total,settings.currency,settings.phpPerUsd)}</strong><br>${totalLabel}</div>`:(()=>{const[name,value]=entries[index];return`<div><strong style="font-size:20px">${money(value,settings.currency,settings.phpPerUsd)}</strong><br><strong style="font-size:17px">${esc(name)}</strong></div>`})();centerText.innerHTML=content;barSummary.innerHTML=content};
-  showCenter(null);
-  clearChartSelection=()=>{selectedSlice=null;donut.classList.remove("has-selection");barChart.classList.remove("has-selection");document.querySelectorAll(".chart-mark,.legend-item").forEach(element=>element.classList.remove("active","preview"));showCenter(null)};
-  reportEmptyState.hidden=!!entries.length;reportEmptyAction.textContent=type==="income"?"+ Add Income":"+ Add Expense";donutWrap.hidden=!entries.length;legend.hidden=!entries.length;
-  if(!entries.length){donut.style.background="transparent";legend.innerHTML="";return}
-  if(isBar){const maximum=Math.max(...entries.map(([,value])=>value));barColumns.innerHTML=entries.map(([name,value],index)=>`<button type="button" class="bar-column chart-mark" data-index="${index}" title="${esc(name)}: ${money(value,settings.currency,settings.phpPerUsd)}"><span class="bar-fill" style="height:${Math.max(8,value/maximum*100)}%;background:${colors[index%colors.length]}"></span><span class="bar-label">${esc(name)}</span></button>`).join("")}else{donut.style.background="transparent";let degrees=0,paths="";entries.forEach(([name,value],index)=>{const start=degrees;degrees+=value/total*360;paths+=`<path class="donut-segment chart-mark" tabindex="0" data-index="${index}" d="${segmentPath(start,degrees)}" fill="${colors[index%colors.length]}"><title>${esc(name)}: ${money(value,settings.currency,settings.phpPerUsd)}</title></path>`});donut.insertAdjacentHTML("afterbegin",`<svg viewBox="0 0 290 290" aria-label="${totalLabel} by category">${paths}</svg>`)}
-  legend.innerHTML=entries.map(([name,value],index)=>`<button type="button" class="legend-item" data-index="${index}" style="color:${colors[index%colors.length]}"><span>${esc(name)} — ${money(value,settings.currency,settings.phpPerUsd)}</span></button>`).join("");
-  const marks=[...(isBar?barColumns:donut).querySelectorAll(".chart-mark")],items=[...legend.querySelectorAll(".legend-item")];
-  function highlight(index,persist=false){if(persist)selectedSlice=index;const shown=index===null?selectedSlice:index;donut.classList.toggle("has-selection",shown!==null);barChart.classList.toggle("has-selection",shown!==null);marks.forEach((mark,i)=>{mark.classList.toggle("active",i===selectedSlice);mark.classList.toggle("preview",i===shown&&i!==selectedSlice)});items.forEach((item,i)=>{item.classList.toggle("active",i===selectedSlice);item.classList.toggle("preview",i===shown&&i!==selectedSlice)});showCenter(shown)}
-  [...marks,...items].forEach(element=>{const index=Number(element.dataset.index);element.addEventListener("mouseenter",()=>highlight(index));element.addEventListener("mouseleave",()=>highlight(null));element.addEventListener("focus",()=>highlight(index));element.addEventListener("blur",()=>highlight(null));element.addEventListener("click",()=>highlight(index,true))});
+const app = initializeApp(firebaseConfig),
+  auth = getAuth(app),
+  db = getFirestore(app);
+function safeEmailKey(email) {
+  return String(email || "guest")
+    .replaceAll("@", "_at_")
+    .replaceAll(".", "_dot_")
+    .replaceAll("+", "_plus_");
 }
-document.addEventListener("click",event=>{if(!event.target.closest(".chart-mark,.legend-item"))clearChartSelection()});
-const reportIncomeCategories=["Salary","Allowance","Business","Freelance","Bonus","Gift","Scholarship","Investment","Refund","Other Income"],reportExpenseCategories=["Food","Transportation","School","Bills","Shopping","Entertainment","Health","Rent","Utilities","Internet / Load","Personal Care","Family","Pet Expenses","Debt / Loan","Other Expense"];
-document.body.insertAdjacentHTML("beforeend",'<div class="modal" id="reportTxModal"><form class="modal-box" id="reportTxForm"><h3 id="reportTxModalTitle">Add Transaction</h3><div id="reportTxMessage" class="message error"></div><label>Title</label><input id="reportTxTitle" class="input" maxlength="80" required><label>Category</label><select id="reportTxCategory" class="select" required></select><div id="reportOtherField" class="field-hidden"><label>Specify category</label><input id="reportOtherCategory" class="input" maxlength="50"></div><label>Amount</label><input id="reportTxAmount" class="input" type="number" min="0.01" step="0.01" required><label>Date</label><input id="reportTxDate" class="input" type="date" required><div class="modal-actions"><button id="cancelReportTx" class="btn secondary" type="button">Cancel</button><button id="saveReportTx" class="btn" type="submit">Save</button></div></form></div>');
-const reportTxModal=document.getElementById("reportTxModal"),reportTxForm=document.getElementById("reportTxForm"),reportTxModalTitle=document.getElementById("reportTxModalTitle"),reportTxTitle=document.getElementById("reportTxTitle"),reportTxCategory=document.getElementById("reportTxCategory"),reportOtherField=document.getElementById("reportOtherField"),reportOtherCategory=document.getElementById("reportOtherCategory"),reportTxAmount=document.getElementById("reportTxAmount"),reportTxDate=document.getElementById("reportTxDate"),reportTxMessage=document.getElementById("reportTxMessage"),saveReportTx=document.getElementById("saveReportTx"),cancelReportTx=document.getElementById("cancelReportTx");
-let reportTxType="expense";
-function toggleReportOther(){const other=reportTxCategory.value==="Other Income"||reportTxCategory.value==="Other Expense";reportOtherField.classList.toggle("field-hidden",!other);reportOtherCategory.required=other;if(!other)reportOtherCategory.value=""}
-function maximumTransactionDate(){return phtDateValue(new Date(Date.now()+86400000))}
-function openReportTransaction(type){reportTxType=type;const choices=type==="income"?reportIncomeCategories:reportExpenseCategories;reportTxModalTitle.textContent=type==="income"?"Add Income":"Add Expense";reportTxForm.reset();reportTxCategory.innerHTML=choices.map(item=>`<option>${esc(item)}</option>`).join("");reportTxDate.value=phtDateValue();reportTxMessage.classList.remove("show");toggleReportOther();reportTxModal.classList.add("open");reportTxTitle.focus()}
-reportEmptyAction.onclick=()=>openReportTransaction(graphType.value);
-reportTxCategory.onchange=toggleReportOther;cancelReportTx.onclick=()=>reportTxModal.classList.remove("open");reportTxModal.onclick=event=>{if(event.target===reportTxModal)reportTxModal.classList.remove("open")};
-const reportActionLinks=[...document.querySelectorAll(".report-grid .panel a.btn")];reportActionLinks.forEach(link=>{const type=link.textContent.includes("Income")?"income":"expense";link.href="#";link.onclick=event=>{event.preventDefault();openReportTransaction(type)}});
-reportTxForm.onsubmit=async event=>{event.preventDefault();const amount=Number(reportTxAmount.value),isOther=reportTxCategory.value.startsWith("Other "),selectedCategory=isOther?reportOtherCategory.value.trim():reportTxCategory.value;if(!currentUser||!reportTxTitle.value.trim()||!selectedCategory||!amount||!reportTxDate.value)return;if(reportTxDate.value>maximumTransactionDate()){reportTxMessage.textContent="This date is not valid because that day has not arrived yet. You may only select up to one day ahead.";reportTxMessage.classList.add("show");return}saveReportTx.disabled=true;try{const php=settings.currency==="USD"?amount*settings.phpPerUsd:amount;tx.push({title:reportTxTitle.value.trim(),category:selectedCategory,amount:php,type:reportTxType,time:phtTimestamp(reportTxDate.value)});await saveTransactions(currentUser,tx);reportTxModal.classList.remove("open");renderInteractive()}catch(error){tx.pop();reportTxMessage.textContent="Could not save the transaction. Please try again.";reportTxMessage.classList.add("show")}finally{saveReportTx.disabled=false}};
-prev.onclick=()=>{periodType.value==="yearly"?month.setFullYear(month.getFullYear()-1):month.setMonth(month.getMonth()-1);renderInteractive()};next.onclick=()=>{periodType.value==="yearly"?month.setFullYear(month.getFullYear()+1):month.setMonth(month.getMonth()+1);renderInteractive()};periodType.onchange=renderInteractive;graphType.onchange=renderInteractive;chartStyle.onchange=()=>{localStorage.setItem("pisotrackChartStyle",chartStyle.value);renderInteractive()};
-onAuthStateChanged(auth,async u=>{if(!u)return location.href="login.html";if(!u.emailVerified){await signOut(auth);return location.href="login.html"}currentUser=u;userName.textContent=u.displayName||u.email;void loadHeaderProfile(u);try{settings=await getSettings(u);localStorage.setItem("pisotrackDark",String(settings.dark));applyDark(settings.dark)}catch(error){console.error(error);settings={currency:"PHP",notifications:true,dark:document.documentElement.classList.contains("dark"),phpPerUsd:56.5}}try{tx=await getTransactions(u)}catch(error){console.error(error);tx=[]}renderInteractive()});
+function transactionKey(email) {
+  return "transactions_" + safeEmailKey(email);
+}
+function normalizeTransactions(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const p = JSON.parse(raw);
+      return Array.isArray(p) ? p : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+}
+function money(v, currency = "PHP", rate = 56.5) {
+  if (currency === "USD")
+    return (
+      "$" +
+      (Number(v || 0) / rate).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    );
+  return (
+    "₱" +
+    Number(v || 0).toLocaleString("en-PH", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+  );
+}
+async function getAppData(user) {
+  const ref = doc(db, "users", user.uid, "appData", "default"),
+    snap = await getDoc(ref);
+  return { ref, data: snap.exists() ? snap.data() : {} };
+}
+async function getTransactions(user) {
+  const { data } = await getAppData(user);
+  return normalizeTransactions(
+    data[transactionKey(user.email)] ??
+      data[transactionKey(data.currentEmail)] ??
+      data.transactions,
+  );
+}
+async function saveTransactions(user, list) {
+  const ref = doc(db, "users", user.uid, "appData", "default");
+  await setDoc(
+    ref,
+    {
+      currentEmail: user.email,
+      email: user.email,
+      [transactionKey(user.email)]: JSON.stringify(list),
+      updatedAt: Date.now(),
+    },
+    { merge: true },
+  );
+}
+async function getSettings(user) {
+  const { data } = await getAppData(user);
+  return {
+    currency: data.currency || "PHP",
+    notifications: data.notifications !== false,
+    dark: data.dark === true,
+    phpPerUsd:
+      typeof data.phpPerUsdNumber === "number" ? data.phpPerUsdNumber : 56.5,
+  };
+}
+async function saveSettings(user, values) {
+  const ref = doc(db, "users", user.uid, "appData", "default");
+  await setDoc(
+    ref,
+    {
+      ...values,
+      currentEmail: user.email,
+      email: user.email,
+      updatedAt: Date.now(),
+    },
+    { merge: true },
+  );
+}
+function applyDark(v) {
+  document.documentElement.classList.toggle("dark", !!v);
+  if (document.body) document.body.classList.toggle("dark", !!v);
+}
+function fmtDate(ms) {
+  return new Date(Number(ms)).toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+}
+function esc(s) {
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+}
+async function loadHeaderProfile(user) {
+  try {
+    const snapshot = await getDoc(doc(db, "users", user.uid)),
+      profile = snapshot.exists() ? snapshot.data() : {},
+      photo = profile.photoDataUrl || "profileicon.png",
+      name = profile.name || user.displayName || "User";
+    [topProfileImage, reportsProfileImage].forEach((image) => {
+      image.src = photo;
+      image.onerror = () => {
+        image.src = "profileicon.png";
+      };
+    });
+    reportsGreeting.textContent = `Hello, ${name}`;
+  } catch (error) {
+    console.error(error);
+    topProfileImage.src = "profileicon.png";
+    reportsProfileImage.src = "profileicon.png";
+    reportsGreeting.textContent = `Hello, ${user.displayName || "User"}`;
+  }
+}
+function phtDateValue(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+function phtTimestamp(value) {
+  return new Date(value + "T12:00:00+08:00").getTime();
+}
+
+let tx = [],
+  settings,
+  currentUser,
+  month = new Date(phtDateValue() + "T00:00:00");
+month.setDate(1);
+const colors = [
+  "#56c774",
+  "#5b9bd5",
+  "#f4b183",
+  "#a785d6",
+  "#e56b6f",
+  "#6cc4c7",
+  "#d5b65a",
+];
+function inSelectedPeriod(ms) {
+  const [year, monthNumber] = phtDateValue(new Date(Number(ms)))
+    .split("-")
+    .map(Number);
+  return periodType.value === "yearly"
+    ? year === month.getFullYear()
+    : year === month.getFullYear() && monthNumber - 1 === month.getMonth();
+}
+function sameMonth(ms) {
+  return inSelectedPeriod(ms);
+}
+const savedChartStyle = localStorage.getItem("pisotrackChartStyle");
+if (savedChartStyle === "donut" || savedChartStyle === "bar")
+  chartStyle.value = savedChartStyle;
+let selectedSlice = null,
+  clearChartSelection = () => {};
+function render() {
+  monthLabel.textContent = month.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+  const m = tx.filter((t) => sameMonth(t.time));
+  let income = 0,
+    expense = 0;
+  m.forEach((t) =>
+    t.type === "income"
+      ? (income += Number(t.amount))
+      : (expense += Number(t.amount)),
+  );
+  inc.textContent = money(income, settings.currency, settings.phpPerUsd);
+  exp.textContent = money(expense, settings.currency, settings.phpPerUsd);
+  bal.textContent = money(
+    income - expense,
+    settings.currency,
+    settings.phpPerUsd,
+  );
+  const type = graphType.value,
+    groups = {};
+  m.filter((t) => t.type === type).forEach(
+    (t) =>
+      (groups[t.category || "Other"] =
+        (groups[t.category || "Other"] || 0) + Number(t.amount)),
+  );
+  const entries = Object.entries(groups),
+    total = entries.reduce((s, [, v]) => s + v, 0);
+  chartTitle.textContent =
+    type === "income" ? "Total Income" : "Total Expenses";
+  centerText.innerHTML = `<div><strong>${money(total, settings.currency, settings.phpPerUsd)}</strong><br>${type === "income" ? "Total Income" : "Total Expenses"}</div>`;
+  if (!entries.length) {
+    donut.style.background = "#56c774";
+    legend.innerHTML =
+      "<span style='color:#56c774'>No " +
+      (type === "income" ? "Income" : "Expenses") +
+      "</span>";
+    return;
+  }
+  let deg = 0,
+    parts = [];
+  legend.innerHTML = "";
+  entries.forEach(([name, v], i) => {
+    const start = deg;
+    deg += (v / total) * 360;
+    parts.push(`${colors[i % colors.length]} ${start}deg ${deg}deg`);
+    legend.innerHTML += `<span style="color:${colors[i % colors.length]}">${esc(name)} — ${money(v, settings.currency, settings.phpPerUsd)}</span>`;
+  });
+  donut.style.background = `conic-gradient(${parts.join(",")})`;
+}
+function polar(radius, angle) {
+  const radians = ((angle - 90) * Math.PI) / 180;
+  return [145 + radius * Math.cos(radians), 145 + radius * Math.sin(radians)];
+}
+function segmentPath(start, end) {
+  const outer = 145,
+    inner = 83;
+  if (end - start >= 359.999)
+    return `M145 0 A145 145 0 1 1 145 290 A145 145 0 1 1 145 0 L145 62 A83 83 0 1 0 145 228 A83 83 0 1 0 145 62 Z`;
+  const a = polar(outer, start),
+    b = polar(outer, end),
+    c = polar(inner, end),
+    d = polar(inner, start),
+    large = end - start > 180 ? 1 : 0;
+  return `M${a[0]} ${a[1]} A${outer} ${outer} 0 ${large} 1 ${b[0]} ${b[1]} L${c[0]} ${c[1]} A${inner} ${inner} 0 ${large} 0 ${d[0]} ${d[1]} Z`;
+}
+function renderInteractive() {
+  monthLabel.classList.remove("skeleton", "skeleton-text");
+  donut.classList.remove("skeleton", "skeleton-chart");
+  donut.removeAttribute("aria-hidden");
+  legend.classList.remove("skeleton", "skeleton-legend");
+  legend.removeAttribute("aria-hidden");
+  [inc, exp, bal].forEach((element) =>
+    element.classList.remove("skeleton", "skeleton-amount"),
+  );
+  document.querySelector(".report-grid")?.setAttribute("aria-busy", "false");
+  monthLabel.textContent =
+    periodType.value === "yearly"
+      ? String(month.getFullYear())
+      : month.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const monthTransactions = tx.filter((t) => inSelectedPeriod(t.time));
+  let income = 0,
+    expense = 0;
+  monthTransactions.forEach((t) =>
+    t.type === "income"
+      ? (income += Number(t.amount))
+      : (expense += Number(t.amount)),
+  );
+  let allIncome = 0,
+    allExpense = 0;
+  tx.forEach((t) =>
+    t.type === "income"
+      ? (allIncome += Number(t.amount))
+      : (allExpense += Number(t.amount)),
+  );
+  inc.textContent = money(income, settings.currency, settings.phpPerUsd);
+  exp.textContent = money(expense, settings.currency, settings.phpPerUsd);
+  bal.textContent = money(
+    allIncome - allExpense,
+    settings.currency,
+    settings.phpPerUsd,
+  );
+  const type = graphType.value,
+    groups = {};
+  monthTransactions
+    .filter(
+      (t) =>
+        t.type === type &&
+        Number.isFinite(Number(t.amount)) &&
+        Number(t.amount) > 0,
+    )
+    .forEach(
+      (t) =>
+        (groups[t.category || "Other"] =
+          (groups[t.category || "Other"] || 0) + Number(t.amount)),
+    );
+  const entries = Object.entries(groups),
+    total = entries.reduce((sum, [, value]) => sum + value, 0),
+    totalLabel = type === "income" ? "Total Income" : "Total Expenses",
+    isBar = chartStyle.value === "bar";
+  chartTitle.textContent = totalLabel;
+  selectedSlice = null;
+  donut.classList.remove("has-selection");
+  barChart.classList.remove("has-selection");
+  donut.querySelector("svg")?.remove();
+  barColumns.innerHTML = "";
+  donut.hidden = isBar;
+  barChart.hidden = !isBar;
+  const showCenter = (index) => {
+    const content =
+      index === null
+        ? `<div><strong>${money(total, settings.currency, settings.phpPerUsd)}</strong><br>${totalLabel}</div>`
+        : (() => {
+            const [name, value] = entries[index];
+            return `<div><strong style="font-size:20px">${money(value, settings.currency, settings.phpPerUsd)}</strong><br><strong style="font-size:17px">${esc(name)}</strong></div>`;
+          })();
+    centerText.innerHTML = content;
+    barSummary.innerHTML = content;
+  };
+  showCenter(null);
+  clearChartSelection = () => {
+    selectedSlice = null;
+    donut.classList.remove("has-selection");
+    barChart.classList.remove("has-selection");
+    document
+      .querySelectorAll(".chart-mark,.legend-item")
+      .forEach((element) => element.classList.remove("active", "preview"));
+    showCenter(null);
+  };
+  reportEmptyState.hidden = !!entries.length;
+  reportEmptyAction.textContent =
+    type === "income" ? "+ Add Income" : "+ Add Expense";
+  donutWrap.hidden = !entries.length;
+  legend.hidden = !entries.length;
+  if (!entries.length) {
+    donut.style.background = "transparent";
+    legend.innerHTML = "";
+    return;
+  }
+  if (isBar) {
+    const maximum = Math.max(...entries.map(([, value]) => value));
+    barColumns.innerHTML = entries
+      .map(
+        ([name, value], index) =>
+          `<button type="button" class="bar-column chart-mark" data-index="${index}" title="${esc(name)}: ${money(value, settings.currency, settings.phpPerUsd)}"><span class="bar-fill" style="height:${Math.max(8, (value / maximum) * 100)}%;background:${colors[index % colors.length]}"></span><span class="bar-label">${esc(name)}</span></button>`,
+      )
+      .join("");
+  } else {
+    donut.style.background = "transparent";
+    let degrees = 0,
+      paths = "";
+    entries.forEach(([name, value], index) => {
+      const start = degrees;
+      degrees += (value / total) * 360;
+      paths += `<path class="donut-segment chart-mark" tabindex="0" data-index="${index}" d="${segmentPath(start, degrees)}" fill="${colors[index % colors.length]}"><title>${esc(name)}: ${money(value, settings.currency, settings.phpPerUsd)}</title></path>`;
+    });
+    donut.insertAdjacentHTML(
+      "afterbegin",
+      `<svg viewBox="0 0 290 290" aria-label="${totalLabel} by category">${paths}</svg>`,
+    );
+  }
+  legend.innerHTML = entries
+    .map(
+      ([name, value], index) =>
+        `<button type="button" class="legend-item" data-index="${index}" style="color:${colors[index % colors.length]}"><span>${esc(name)} — ${money(value, settings.currency, settings.phpPerUsd)}</span></button>`,
+    )
+    .join("");
+  const marks = [
+      ...(isBar ? barColumns : donut).querySelectorAll(".chart-mark"),
+    ],
+    items = [...legend.querySelectorAll(".legend-item")];
+  function highlight(index, persist = false) {
+    if (persist) selectedSlice = index;
+    const shown = index === null ? selectedSlice : index;
+    donut.classList.toggle("has-selection", shown !== null);
+    barChart.classList.toggle("has-selection", shown !== null);
+    marks.forEach((mark, i) => {
+      mark.classList.toggle("active", i === selectedSlice);
+      mark.classList.toggle("preview", i === shown && i !== selectedSlice);
+    });
+    items.forEach((item, i) => {
+      item.classList.toggle("active", i === selectedSlice);
+      item.classList.toggle("preview", i === shown && i !== selectedSlice);
+    });
+    showCenter(shown);
+  }
+  [...marks, ...items].forEach((element) => {
+    const index = Number(element.dataset.index);
+    element.addEventListener("mouseenter", () => highlight(index));
+    element.addEventListener("mouseleave", () => highlight(null));
+    element.addEventListener("focus", () => highlight(index));
+    element.addEventListener("blur", () => highlight(null));
+    element.addEventListener("click", () => highlight(index, true));
+  });
+}
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".chart-mark,.legend-item")) clearChartSelection();
+});
+const reportIncomeCategories = [
+    "Salary",
+    "Allowance",
+    "Business",
+    "Freelance",
+    "Bonus",
+    "Gift",
+    "Scholarship",
+    "Investment",
+    "Refund",
+    "Other Income",
+  ],
+  reportExpenseCategories = [
+    "Food",
+    "Transportation",
+    "School",
+    "Bills",
+    "Shopping",
+    "Entertainment",
+    "Health",
+    "Rent",
+    "Utilities",
+    "Internet / Load",
+    "Personal Care",
+    "Family",
+    "Pet Expenses",
+    "Debt / Loan",
+    "Other Expense",
+  ];
+document.body.insertAdjacentHTML(
+  "beforeend",
+  '<div class="modal" id="reportTxModal"><form class="modal-box" id="reportTxForm"><h3 id="reportTxModalTitle">Add Transaction</h3><div id="reportTxMessage" class="message error"></div><label>Title</label><input id="reportTxTitle" class="input" maxlength="80" required><label>Category</label><select id="reportTxCategory" class="select" required></select><div id="reportOtherField" class="field-hidden"><label>Specify category</label><input id="reportOtherCategory" class="input" maxlength="50"></div><label>Amount</label><input id="reportTxAmount" class="input" type="number" min="0.01" step="0.01" required><label>Date</label><input id="reportTxDate" class="input" type="date" required><div class="modal-actions"><button id="cancelReportTx" class="btn secondary" type="button">Cancel</button><button id="saveReportTx" class="btn" type="submit">Save</button></div></form></div>',
+);
+const reportTxModal = document.getElementById("reportTxModal"),
+  reportTxForm = document.getElementById("reportTxForm"),
+  reportTxModalTitle = document.getElementById("reportTxModalTitle"),
+  reportTxTitle = document.getElementById("reportTxTitle"),
+  reportTxCategory = document.getElementById("reportTxCategory"),
+  reportOtherField = document.getElementById("reportOtherField"),
+  reportOtherCategory = document.getElementById("reportOtherCategory"),
+  reportTxAmount = document.getElementById("reportTxAmount"),
+  reportTxDate = document.getElementById("reportTxDate"),
+  reportTxMessage = document.getElementById("reportTxMessage"),
+  saveReportTx = document.getElementById("saveReportTx"),
+  cancelReportTx = document.getElementById("cancelReportTx");
+let reportTxType = "expense";
+function toggleReportOther() {
+  const other =
+    reportTxCategory.value === "Other Income" ||
+    reportTxCategory.value === "Other Expense";
+  reportOtherField.classList.toggle("field-hidden", !other);
+  reportOtherCategory.required = other;
+  if (!other) reportOtherCategory.value = "";
+}
+function maximumTransactionDate() {
+  return phtDateValue(new Date(Date.now() + 86400000));
+}
+function openReportTransaction(type) {
+  reportTxType = type;
+  const choices =
+    type === "income" ? reportIncomeCategories : reportExpenseCategories;
+  reportTxModalTitle.textContent =
+    type === "income" ? "Add Income" : "Add Expense";
+  reportTxForm.reset();
+  reportTxCategory.innerHTML = choices
+    .map((item) => `<option>${esc(item)}</option>`)
+    .join("");
+  reportTxDate.value = phtDateValue();
+  reportTxMessage.classList.remove("show");
+  toggleReportOther();
+  reportTxModal.classList.add("open");
+  reportTxTitle.focus();
+}
+reportEmptyAction.onclick = () => openReportTransaction(graphType.value);
+reportTxCategory.onchange = toggleReportOther;
+cancelReportTx.onclick = () => reportTxModal.classList.remove("open");
+reportTxModal.onclick = (event) => {
+  if (event.target === reportTxModal) reportTxModal.classList.remove("open");
+};
+const reportActionLinks = [
+  ...document.querySelectorAll(".report-grid .panel a.btn"),
+];
+reportActionLinks.forEach((link) => {
+  const type = link.textContent.includes("Income") ? "income" : "expense";
+  link.href = "#";
+  link.onclick = (event) => {
+    event.preventDefault();
+    openReportTransaction(type);
+  };
+});
+reportTxForm.onsubmit = async (event) => {
+  event.preventDefault();
+  const amount = Number(reportTxAmount.value),
+    isOther = reportTxCategory.value.startsWith("Other "),
+    selectedCategory = isOther
+      ? reportOtherCategory.value.trim()
+      : reportTxCategory.value;
+  if (
+    !currentUser ||
+    !reportTxTitle.value.trim() ||
+    !selectedCategory ||
+    !amount ||
+    !reportTxDate.value
+  )
+    return;
+  if (reportTxDate.value > maximumTransactionDate()) {
+    reportTxMessage.textContent =
+      "This date is not valid because that day has not arrived yet. You may only select up to one day ahead.";
+    reportTxMessage.classList.add("show");
+    return;
+  }
+  saveReportTx.disabled = true;
+  try {
+    const php =
+      settings.currency === "USD" ? amount * settings.phpPerUsd : amount;
+    tx.push({
+      title: reportTxTitle.value.trim(),
+      category: selectedCategory,
+      amount: php,
+      type: reportTxType,
+      time: phtTimestamp(reportTxDate.value),
+    });
+    await saveTransactions(currentUser, tx);
+    reportTxModal.classList.remove("open");
+    renderInteractive();
+  } catch (error) {
+    tx.pop();
+    reportTxMessage.textContent =
+      "Could not save the transaction. Please try again.";
+    reportTxMessage.classList.add("show");
+  } finally {
+    saveReportTx.disabled = false;
+  }
+};
+prev.onclick = () => {
+  periodType.value === "yearly"
+    ? month.setFullYear(month.getFullYear() - 1)
+    : month.setMonth(month.getMonth() - 1);
+  renderInteractive();
+};
+next.onclick = () => {
+  periodType.value === "yearly"
+    ? month.setFullYear(month.getFullYear() + 1)
+    : month.setMonth(month.getMonth() + 1);
+  renderInteractive();
+};
+periodType.onchange = renderInteractive;
+graphType.onchange = renderInteractive;
+chartStyle.onchange = () => {
+  localStorage.setItem("pisotrackChartStyle", chartStyle.value);
+  renderInteractive();
+};
+onAuthStateChanged(auth, async (u) => {
+  if (!u) return (location.href = "login.html");
+  if (!u.emailVerified) {
+    await signOut(auth);
+    return (location.href = "login.html");
+  }
+  currentUser = u;
+  userName.textContent = u.displayName || u.email;
+  void loadHeaderProfile(u);
+  try {
+    settings = await getSettings(u);
+    localStorage.setItem("pisotrackDark", String(settings.dark));
+    applyDark(settings.dark);
+  } catch (error) {
+    console.error(error);
+    settings = {
+      currency: "PHP",
+      notifications: true,
+      dark: document.documentElement.classList.contains("dark"),
+      phpPerUsd: 56.5,
+    };
+  }
+  try {
+    tx = await getTransactions(u);
+  } catch (error) {
+    console.error(error);
+    tx = [];
+  }
+  renderInteractive();
+});

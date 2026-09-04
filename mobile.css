@@ -191,8 +191,8 @@
     height: 48px;
     justify-self: stretch;
   }
-  .dashboard-page .filters #category { grid-column: 2; }
-  .dashboard-page .filters #range { grid-column: 3; }
+  .dashboard-page .filters .category-filter { grid-column: 2; }
+  .dashboard-page .filters .range-filter { grid-column: 3; }
   .dashboard-page .filters #searchTx {
     grid-column: 1 / -1 !important;
     width: 100%;
@@ -275,8 +275,8 @@
   .dashboard-page .main { padding-inline: 12px !important; }
   .dashboard-page .topbar { margin-inline: -12px !important; }
   .dashboard-page .filters { grid-template-columns: 52px minmax(0, 1fr) !important; }
-  .dashboard-page .filters #category { grid-column: 2; }
-  .dashboard-page .filters #range { grid-column: 1 / -1; }
+  .dashboard-page .filters .category-filter { grid-column: 2; }
+  .dashboard-page .filters .range-filter { grid-column: 1 / -1; }
   .dashboard-page .transactions-greeting .profile-avatar { width: 50px; height: 50px; }
   .dashboard-page .transactions-greeting-copy strong { font-size: 17px; }
   .dashboard-page .transactions-greeting-copy span { font-size: 12px; }

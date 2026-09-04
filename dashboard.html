@@ -40,14 +40,22 @@
         <div class="transactions-greeting"><img id="transactionProfileImage" class="profile-avatar" src="profileicon.png" alt="Profile picture"><div class="transactions-greeting-copy"><strong id="transactionGreeting">Hello, User</strong><span>Here is your transaction history</span></div></div>
         <div class="filters">
           <button id="downloadAll" class="icon-download" type="button" aria-label="Download complete transaction history" title="Download complete transaction history"><img src="download.png" alt=""></button>
-          <select id="category" class="select">
-            <option>All</option></select
-          ><select id="range" class="select">
-            <option>This Month</option>
-            <option>Last 3 Months</option>
-            <option>Last 6 Months</option>
-            <option>Last Year</option></select
-          ><input
+          <div class="filter-field category-filter">
+            <label for="category">Categories</label>
+            <select id="category" class="select">
+              <option>All</option>
+            </select>
+          </div>
+          <div class="filter-field range-filter">
+            <label for="range">When</label>
+            <select id="range" class="select">
+              <option>This Month</option>
+              <option>Last 3 Months</option>
+              <option>Last 6 Months</option>
+              <option>Last Year</option>
+            </select>
+          </div>
+          <input
             id="searchTx"
             class="input"
             type="search"
@@ -72,6 +80,9 @@
         </section>
       </main>
     </div>
+    <button id="backToTop" class="back-to-top" type="button" aria-label="Back to top" title="Back to top">
+      <img src="arrowup.png" alt="" />
+    </button>
     <div class="modal" id="modal">
       <div class="modal-box">
         <h3 id="modalTitle">Add Transaction</h3>
